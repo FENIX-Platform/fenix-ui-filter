@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/FENIX-Platform/fenix-ui-filter.png?label=ready&title=Ready)](https://waffle.io/FENIX-Platform/fenix-ui-filter)
 Fenix UI Skeleton
 =======
 Basic structure for Fenix Platform UI projects
