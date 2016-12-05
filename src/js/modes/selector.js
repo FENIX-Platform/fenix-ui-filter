@@ -1019,10 +1019,37 @@ define([
 
     Selector.prototype._dep_disable = function (data) {
 
+        console.log("DISABLE")
+
         _.each(this.selectors, function (selector) {
             selector.instance._dep_disable(data);
         });
     };
+
+    Selector.prototype._dep_readOnlyIfNotValue = function (payload, o) {
+        log.info("_dep_readOnlyIfNotValue invokation");
+        log.info(o);
+
+        console.log("_dep_readOnlyIfNotValue")
+
+
+        return;
+
+        var forbiddenValue = o.args.value,
+            selectedValues = payload.values || [],
+            group = this.groups[o.group] || {},
+            target = group[o.target] || {},
+            instance = target.instance;
+
+        if (instance) {
+            if (_.contains(selectedValues, forbiddenValue)) {
+                instance.disableReadOnly()
+            } else {
+                instance.enableReadOnly()
+            }
+        }
+    };
+
 
     return Selector;
 

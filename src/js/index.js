@@ -69,9 +69,9 @@ define([
                 valid: values.valid
             };
 
-            if (values.errors) {
-                result.errors =  values.errors
-            }
+        if (values.errors) {
+            result.errors = values.errors
+        }
 
         return result
     };
@@ -516,16 +516,36 @@ define([
 
         this._updateSummary();
 
+        this._configureSelectorAfterDependency();
+
         log.info("~~~~ Filter [" + this.id + "] is ready");
 
         this._trigger('ready');
 
     };
 
+    Filter.prototype._configureSelectorAfterDependency = function() {
+
+        var self = this,
+            values = this.getValues();
+
+        _.each(this.events2selectors, function(selectors, event) {
+
+            _.each(selectors, function(sel) {
+
+                self._trigger("dep_" + event + "_" + sel, {
+                    id : sel,
+                    values : values.values[sel],
+                    labels : values.labels[sel]
+                });
+            });
+        });
+    };
+
     Filter.prototype._disableDisabledSelectorsByDefault = function () {
 
         _.each(this.selectors, _.bind(function (s, name) {
-            if (s.selector && s.selector.disabled === true) {
+            if (s.disabled === true) {
                 this._callSelectorInstanceMethod(name, "disable");
             }
         }, this));
@@ -718,6 +738,8 @@ define([
 
         }, this));
 
+        this._configureSelectorAfterDependency();
+
         log.info("Filter values set");
 
     };
@@ -775,6 +797,8 @@ define([
     // dependencies fns
 
     Filter.prototype._initDependencies = function () {
+
+        this.events2selectors = {};
 
         //register custom dependencies
         _.each(this.dependencies, _.bind(function (fn, id) {
@@ -853,6 +877,14 @@ define([
                             }
                         }
                     };
+
+                    if (!this.events2selectors[d.event]) {
+                        this.events2selectors[d.event] = []
+                    }
+
+                    this.events2selectors[d.event].push(s);
+                    this.events2selectors[d.event] = _.uniq(this.events2selectors[d.event]);
+
                     this.dependeciesToDestory.push(toAdd);
 
                     this.on(toAdd.event, toAdd.callback, this);

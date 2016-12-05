@@ -55,7 +55,8 @@ define([
             SOURCES_BTN: "#sources-btn",
             AMIS: "#amis",
             AMIS_BTN: "#amis-get-values-btn",
-            AMIS_REMOVE_BTN: "#amis-remove-btn"
+            AMIS_REMOVE_BTN: "#amis-remove-btn",
+            AMIS_ADD_BTN: "#amis-add-btn",
         },
         empty_model = {data: []},
         error_model = {},
@@ -224,17 +225,25 @@ define([
             }
         }).on("ready", function (evt) {
             console.log("Ready");
-        }).on("click", function() {
+        }).on("click", function () {
             filter.validate()
         });
 
         $(s.AMIS_BTN).on("click", function () {
-            console.log(filter.printDefaultSelection())
+            console.log(filter.getValues())
         });
 
         $(s.AMIS_REMOVE_BTN).on("click", function () {
             console.log(filter.dispose())
-        })
+        });
+
+        $(s.AMIS_ADD_BTN).on("click", function () {
+            console.log(filter.setValues({
+                values: {
+                    MicroDietaryComponents: ["13", "01"]
+                }
+            }))
+        });
 
     };
 

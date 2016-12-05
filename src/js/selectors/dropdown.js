@@ -263,7 +263,6 @@ define([
                 if (a.text > b.text) return 1;
                 return 0;
             });
-
         }
 
         return data;

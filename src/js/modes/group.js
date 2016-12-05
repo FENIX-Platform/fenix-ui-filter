@@ -269,6 +269,8 @@ define([
 
         this.$el.find(s.SWITCH).prop("checked", true);
 
+        this.$el.find(s.ADD_BTN).prop('disabled', false);
+
         if (!silent) {
             this._trigger(EVT.SELECTOR_ENABLED);
         }
@@ -297,6 +299,8 @@ define([
         this.status.disabled = true;
 
         this.$el.find(s.SWITCH).prop("checked", false);
+
+        this.$el.find(s.ADD_BTN).prop('disabled', true);
 
         if (!silent) {
             this._trigger(EVT.SELECTOR_DISABLED);
@@ -730,27 +734,6 @@ define([
 
     Group.prototype._getEventName = function (evt) {
         return this.controller.id + evt;
-    };
-
-    //Dependencies
-
-    Group.prototype._dep_readOnlyIfNotValue = function (payload, o) {
-        log.info("_dep_readOnlyIfNotValue invokation");
-        log.info(o);
-
-        var forbiddenValue = o.args.value,
-            selectedValues = payload.values || [],
-            group = this.groups[o.group] || {},
-            target = group[o.target] || {},
-            instance = target.instance;
-
-        if (instance) {
-            if (_.contains(selectedValues, forbiddenValue)) {
-                instance.disableReadOnly()
-            } else {
-                instance.enableReadOnly()
-            }
-        }
     };
 
     //pub/sub
