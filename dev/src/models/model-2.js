@@ -2,158 +2,182 @@ define(function () {
 
     return {
 
-        "MicroDietaryComponents": {
+        sortable: {
 
-            //disabled : true,
-
-            "cl": {uid: 'GIFT_Micronutrients'},
-
-            "selector": {
-                "id": "dropdown",
-                "sort": false,
-                //default : ["13","01"]
-            },
-
-            "template": {
-                "title": "Micronutrients available in the dataset",
-                "hideDescription": true,
-                "footer": "List micronutrients for which dietary intake has been calculated in the dataset",
-            },
-
-            "format": {
-                "output": "codes:extended"
-            }
-        },
-
-        "MicroDietaryComponentsDetails": {
-
-            disabled : true,
-
-            "incremental": true,
-
-            classNames: "well",
-
-            "template": {
-                "title": "Micronutrients and minerals available in the dataset - details",
-                "hideDescription": true,
-                "footer": "List additional micronutrients reported here above as 'other'",
-            },
-
-            "selectors": {
-                "MicroDietaryComponentsDetailsList": {
-                    "selector": {
-                        "id": "input",
-                        "type": "text",
-                        "source": [{"value": "MicroDietaryComponentsDetailsList"}]
-                    },
-                    "format": {
-                        "output": "label"
-                    },
-                    "template": {
-                        "title": "Micronutrients and minerals available in the dataset - details",
-                        "hideDescription": true,
-                        "footer": "List additional micronutrients reported here above as 'other'",
+            selector: {
+                id: "sortable",
+                source: [
+                    {value: "item_1", label: "item_1", parent : "g_1"},
+                    {value: "item_2", label: "item_2", parent : "g_2"}
+                ],
+                config : {
+                    groups : {
+                        g_1 : "Group 1",
+                        g_2 : "Group 2"
                     }
                 }
             },
 
-            format: {
-                output: "array<label>"
+            template : {
+                hideRemoveButton : false,
+                hideSwitch: false
+            }
+        },
+
+        textarea: {
+
+            selector: {
+                id: "textarea"
+            },
+
+            template : {
+                hideRemoveButton : false,
+                hideSwitch: false
+            }
+        },
+
+        time: {
+
+            selector: {
+                id: "time"
+            },
+
+            template : {
+                hideRemoveButton : false,
+                hideSwitch: false
+            }
+        },
+
+        range: {
+
+            selector: {
+                id: "range",
+                min : 10,
+                max : 20
+
+            },
+
+            template : {
+                hideRemoveButton : false,
+                hideSwitch: false
+            }
+        },
+
+        input: {
+
+            selector: {
+                id: "input",
+                type: "checkbox",
+                source: [
+                    {value: "disable", label: "Disable"},
+                    {value: "enable", label: "Enable"}
+                ]
+            },
+
+            template : {
+                hideRemoveButton : false,
+                hideSwitch: false
+            }
+        },
+
+        tree: {
+
+            selector: {
+                id: "tree",
+                source: [
+                    {value: "disable", label: "Disable"},
+                    {value: "enable", label: "Enable"}
+                ]
+            },
+
+            template : {
+                hideRemoveButton : false,
+                hideSwitch: false
+            }
+        },
+
+        dropdown: {
+
+            selector: {
+                id: "dropdown",
+                source: [
+                    {value: "disable", label: "Disable"},
+                    {value: "enable", label: "Enable"}
+                ],
+                config: {
+                    maxItems: 1
+                }
+            },
+
+            template : {
+                hideRemoveButton : false,
+                hideSwitch: false
+            }
+        },
+
+    /*    selector: {
+            selector: {
+                id: "dropdown",
+                source: [
+                    {value: "one", label: "One"},
+                    {value: "two", label: "Two"}
+                ]
             },
 
             dependencies: {
-                MicroDietaryComponents: [{
-                    id: "enableIfValue",
-                    event: "select",
-                    args: {value: "13"}
-                }]
+                dropdown: [{id: "readOnlyIfNotValue", event: "select", args: {value: "other"}}]
             }
 
-        }
+        },
 
+        contact: {
 
+            selectors: {
 
-        /*   dropdown : {
+                role: {
 
-         selector : {
-         id  : "dropdown",
-         source: [
-         {value : "disable", label : "Disable"},
-         {value : "enable", label : "Enable"}
-         ],
-         config : {
-         maxItems : 1
-         }
-         }
-         },
+                    template: {
+                        title: "This is the title",
+                        description: "This is the description",
+                        footer: "This is the footer"
+                    },
 
-         selector : {
-         selector : {
-         id  : "dropdown",
-         source: [
-         {value : "one", label : "One"},
-         {value : "two", label : "Two"}
-         ]
-         },
+                    enumeration: {
+                        uid: "ResponsiblePartyRole"
+                    },
 
-         dependencies : {
-         dropdown: [{id: "readOnlyIfNotValue", event: "select", args: {value: "other"}}]
-         }
+                    selector: {
+                        id: "tree",
+                        config: {
+                            maxItems: 1
+                        }
+                    },
 
-         },
+                    format: {
+                        output: "label"
+                    }
 
-         contact: {
+                },
 
-         selectors: {
+                specify: {
 
-         role: {
+                    selector: {
+                        id: "textarea",
+                        source: [{"value": "specify", "label": "Specify"}]
 
-         template: {
-         title: "This is the title",
-         description: "This is the description",
-         footer: "This is the footer"
-         },
+                    },
 
-         enumeration: {
-         uid: "ResponsiblePartyRole"
-         },
+                    format: {
+                        output: "label"
+                    }
 
-         selector: {
-         id: "tree",
-         config: {
-         maxItems: 1
-         }
-         },
+                }
+            },
 
-         format: {
-         output: "label"
-         }
+            template: {
+                title: "Title"
+            },
 
-         },
-
-         specify: {
-
-         selector: {
-         id: "textarea",
-         source: [{"value": "specify", "label": "Specify"}]
-
-         },
-
-         format: {
-         output: "label"
-         }
-
-         }
-         },
-
-         template: {
-         title: "Title"
-         },
-
-         /!*dependencies : {
-         dropdown: [{id: "readOnlyIfNotValue", event: "select", args: {value: "other"}}]
-         }*!/
-         }*/
+        }*/
     }
-})
-;
+});

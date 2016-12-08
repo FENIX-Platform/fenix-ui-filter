@@ -156,78 +156,20 @@ define([
         var filter = this.createFilter({
             el: s.AMIS,
             lang: "FR",
-            selectors: Model2,
-            dependencies: {
-                disableSpecialCondition: function (payload, o) {
-
-                    var threshold = parseInt(o.args.threshold),
-                        forbiddenGender = o.args.forbiddenGender,
-                        forbiddenAgeGranularity = o.args.forbiddenAgeGranularity,
-                        selectedValues = payload.values || {},
-                        //age selector
-                        to = _.findWhere(selectedValues.age, {parent: "to"}) || {},
-                        toValue = !isNaN(parseInt(to.value)) ? parseInt(to.value) : -1,
-                        //gender selector
-                        gender = selectedValues.gender,
-                        toDisable = false,
-                        //age granularity
-                        ageGranularity = selectedValues.ageGranularity[0];
-
-                    //if 'to' value is less then threshold
-                    if (toValue < threshold) {
-                        toDisable = true
-                    }
-
-                    //if gender is forbidden
-                    if (_.contains(gender, forbiddenGender)) {
-                        toDisable = true
-                    }
-
-                    //if 'to' value is less then threshold
-                    if (forbiddenAgeGranularity === ageGranularity) {
-                        toDisable = true
-                    }
-
-                    if (!!toDisable) {
-                        this._callSelectorInstanceMethod(o.target, "disable");
-                    } else {
-                        this._callSelectorInstanceMethod(o.target, "enable");
-                    }
-
-                },
-                updateAge: function (payload, o) {
-
-                    var granularity = payload.values[0],
-                        yearConfig = {
-                            min: 0,
-                            max: 120,
-                            from: 0,
-                            to: 120,
-                            step: 0.5
-                        },
-                        monthConfig = {
-                            min: 0,
-                            max: 60,
-                            from: 0,
-                            to: 60,
-                            step: 1
-                        };
-
-                    switch (granularity.toLowerCase()) {
-                        case "year" :
-                            this._callSelectorInstanceMethod(o.target, "update", yearConfig);
-                            break;
-                        case "month" :
-                            this._callSelectorInstanceMethod(o.target, "update", monthConfig);
-                            break;
-                    }
-                }
-            }
+            selectors: Model2
         }).on("ready", function (evt) {
             console.log("Ready");
-        }).on("click", function () {
-            filter.validate()
+        }).on("select", function (values) {
+            console.log("Select event")
+            console.log(values)
+        }).on("change", function (values) {
+            console.log("Change event")
+            console.log(values)
+        }).on("remove", function (values) {
+            console.log("remove event")
+            console.log(values)
         });
+
 
         $(s.AMIS_BTN).on("click", function () {
             console.log(filter.getValues())

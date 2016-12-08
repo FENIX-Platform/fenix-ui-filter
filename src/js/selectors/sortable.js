@@ -314,11 +314,15 @@ define([
                             //workaround for silent change
                             if (this.silentMode !== true) {
 
-                                this._trigger(self._getEventName(EVT.SELECTOR_SELECTED), {
+                                var value = $itemEl.data('id'),
+                                    labels = {};
+
+                                labels[value] = $itemEl.text();
+
+                                this._trigger(EVT.SELECTOR_SELECTED, {
                                     id: this.id,
-                                    value: $itemEl.data('id'),
-                                    label: $itemEl.text(),
-                                    parent: name
+                                    values: [value],
+                                    labels:labels
                                 });
 
                             }

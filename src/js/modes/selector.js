@@ -425,7 +425,7 @@ define([
         this.$el.find(s.SWITCH).prop("checked", true);
 
         if (!silent) {
-            this._trigger(EVT.SELECTOR_ENABLED);
+            this._trigger(EVT.SELECTOR_ENABLED, {id: this.id});
         }
 
     };
@@ -443,7 +443,7 @@ define([
         this.$el.find(s.SWITCH).prop("checked", false);
 
         if (!silent) {
-            this._trigger(EVT.SELECTOR_DISABLED);
+            this._trigger(EVT.SELECTOR_DISABLED, {id: this.id});
         }
 
     };
@@ -503,16 +503,12 @@ define([
      * */
     Selector.prototype.tagAsInvalid = function (el, message) {
 
-
         var $el = el || this.$el,
             text = message.join(", ");
-
-        //console.log('tagAsInvalid' , $el);
 
         $el.find(".form-group").addClass("has-error");
         $el.find(".help-block.error").html(ValidateJs.capitalize(text));
 
-        //console.log($el.find(".form-group").length);
     };
 
     /**
@@ -521,8 +517,6 @@ define([
     Selector.prototype.tagAsValid = function (el) {
 
         var $el = el || this.$el;
-
-        //$el.find(".form-group").addClass("has-success");
         $el.find(".help-block.error").empty();
     };
 
@@ -533,7 +527,6 @@ define([
         var $el = el || this.$el;
 
         $el.find(".form-group").removeClass("has-error");
-        //$el.find(".form-group").removeClass("has-success");
         $el.find(".help-block.error").empty();
     };
 
@@ -1019,8 +1012,6 @@ define([
 
     Selector.prototype._dep_disable = function (data) {
 
-        console.log("DISABLE")
-
         _.each(this.selectors, function (selector) {
             selector.instance._dep_disable(data);
         });
@@ -1029,11 +1020,6 @@ define([
     Selector.prototype._dep_readOnlyIfNotValue = function (payload, o) {
         log.info("_dep_readOnlyIfNotValue invokation");
         log.info(o);
-
-        console.log("_dep_readOnlyIfNotValue")
-
-
-        return;
 
         var forbiddenValue = o.args.value,
             selectedValues = payload.values || [],

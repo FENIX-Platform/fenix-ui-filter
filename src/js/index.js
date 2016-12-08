@@ -181,18 +181,21 @@ define([
      */
     Filter.prototype.remove = function (id) {
 
+        var ids ;
         //force to be array
         if (!Array.isArray(id)) {
-            id = [id];
+            ids = [id];
+        } else {
+            ids = id;
         }
 
-        _.each(id, _.bind(function (i) {
+        _.each(ids, _.bind(function (i) {
             this._removeSelector(i);
         }, this));
 
         this._updateSummary();
 
-        this._trigger("remove", {id: id});
+        this._trigger("remove", {id: ids[0]});
 
     };
 
@@ -673,8 +676,6 @@ define([
 
         this.selectorsId = _.without(this.selectorsId, id);
 
-        this._trigger("remove", {id: id});
-
     };
 
     // filter selection [values] and validation
@@ -1143,7 +1144,7 @@ define([
 
         if (this.ready === true) {
 
-            this._trigger('click', values);
+            this._trigger('select', values);
 
             if (values) {
                 //call dependencies
@@ -1173,11 +1174,13 @@ define([
     Filter.prototype._onSelectorRemoved = function (obj) {
 
         if (obj) {
+
             this.remove(obj.id);
 
             this._trigger("dep_change_" + obj.id, obj);
 
             this._checkSelectorsAmount();
+
         }
 
     };
