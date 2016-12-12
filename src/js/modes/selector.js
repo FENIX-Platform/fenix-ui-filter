@@ -146,6 +146,8 @@ define([
         }
         else {
 
+            // console.log(this.mainSelector.instance); // << da valore nullo
+
             v = this.mainSelector.instance.getValues(format);
             values = v.values;
             labels = v.labels;
