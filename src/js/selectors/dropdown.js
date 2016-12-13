@@ -359,7 +359,7 @@ define([
                 //print default values
                 if (found)
                     instance.setValue(config.default)
-                else if(config.emptyOption && config.emptyOption.value)
+                else if(config.emptyOption.enabled && config.emptyOption.value)
                     instance.setValue(config.emptyOption.value);
 
             } else {
@@ -367,11 +367,6 @@ define([
                 instance.setValue(config.default);
             }
         }
-
-        /**if (config.default) {
-            //print default values
-            instance.setValue(config.default);
-        }**/
 
     };
 
