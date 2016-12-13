@@ -353,7 +353,7 @@ define([
             if (data) {
                 //check for default value
                 var found = _.find(data, function (option) {
-                    return option.value === config.default[0].toString();
+                    return option.value.toString() === config.default[0].toString();
                 });
 
                 //print default values
