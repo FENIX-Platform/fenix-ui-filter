@@ -142,7 +142,7 @@ describe("Selector", function () {
 
             values = filter.getValues();
 
-            expect(values.labels.item).to.be.an('object');
+            console.log(JSON.stringify(values))
 
             done(); //async execution
         });

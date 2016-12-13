@@ -125,7 +125,6 @@ define([
 
             else {
 
-
                 v = this.mainSelector.instance.getValues(format);
                 values[this.lang.toUpperCase()] = v.values;
                 labels[this.lang.toUpperCase()] = v.labels;
@@ -145,8 +144,6 @@ define([
 
         }
         else {
-
-            // console.log(this.mainSelector.instance); // << da valore nullo
 
             v = this.mainSelector.instance.getValues(format);
             values = v.values;
@@ -575,6 +572,7 @@ define([
         var key = Object.keys(this.selectors)[0];
 
         this.mainSelector = this.selectors[key];
+
 
         return result;
     };

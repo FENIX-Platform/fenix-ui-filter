@@ -739,7 +739,9 @@ define([
 
         }, this));
 
-        this._configureSelectorAfterDependency();
+        window.setTimeout(_.bind(function(){
+            this._configureSelectorAfterDependency();
+        }, this), 100);
 
         log.info("Filter values set");
 

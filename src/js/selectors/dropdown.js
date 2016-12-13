@@ -15,8 +15,8 @@ define([
     var defaultOptions = {
             selector: {
                 hideSelectAllButton: true,
-                hideClearAllButton : true,
-                emptyOption : {
+                hideClearAllButton: true,
+                emptyOption: {
                     enabled: false,
                     text: "All",
                     value: "all"
@@ -37,8 +37,11 @@ define([
         $.extend(true, this, defaultOptions, o, {$el: $(o.el)});
 
         this._renderTemplate();
+
         this._initVariables();
+
         this._renderDropdown();
+
         this._bindEventListeners();
 
         //force async execution
@@ -84,7 +87,7 @@ define([
      * getValues method
      * Mandatory method
      */
-    Dropdown.prototype.setSource = function ( source ) {
+    Dropdown.prototype.setSource = function (source) {
 
         var data = _.map(source, function (d) {
             return {
@@ -198,7 +201,14 @@ define([
      */
     Dropdown.prototype.setValue = function (v, silent) {
         log.info("Set dropdown value: " + JSON.stringify(v) + ". Silent? " + silent);
+
         var instance = this.dropdown[0].selectize;
+
+        _.each(v, function (i) {
+            console.log(i)
+            instance.addOption({value: i, text: i}, silent);
+        });
+
         instance.setValue(v, silent);
     };
 
@@ -259,10 +269,10 @@ define([
         if (!!this.selector.sort) {
             data = data.sort(
                 (typeof this.selector.sort === 'function') ? this.selector.sort : function (a, b) {
-                if (a.text < b.text) return -1;
-                if (a.text > b.text) return 1;
-                return 0;
-            });
+                    if (a.text < b.text) return -1;
+                    if (a.text > b.text) return 1;
+                    return 0;
+                });
         }
 
         return data;
@@ -319,8 +329,8 @@ define([
         }
 
         // Add Empty Option
-        if(config.emptyOption.enabled){
-            data.splice(0,0,{value:config.emptyOption.value,  text:config.emptyOption.text,  parent:"#"});
+        if (config.emptyOption.enabled) {
+            data.splice(0, 0, {value: config.emptyOption.value, text: config.emptyOption.text, parent: "#"});
         }
 
         opt = $.extend(true, {}, selectize, {
@@ -357,14 +367,15 @@ define([
                 });
 
                 //print default values
-                if (found)
-                    instance.setValue(config.default)
-                else if(config.emptyOption.enabled && config.emptyOption.value)
+                if (found){
+                    this.setValue(config.default);
+                } else if (config.emptyOption && config.emptyOption.value){
                     instance.setValue(config.emptyOption.value);
+                }
 
             } else {
                 //print default values
-                instance.setValue(config.default);
+                this.setValue(config.default);
             }
         }
 
@@ -402,18 +413,18 @@ define([
                     });
                 });
 
-                self._trigger(EVT.SELECTOR_SELECTED, $.extend({id: self.id}, self.getValues()) )
+                self._trigger(EVT.SELECTOR_SELECTED, $.extend({id: self.id}, self.getValues()))
 
             }
-            
+
         });
 
-       /* In conflict, with ON CHANGE EVENT
-           this.$el.find('.selectize-control').on('click', function () {
-            if (self.status.ready === true) {
-                self._trigger(EVT.SELECTOR_SELECTED, $.extend({id: self.id}, self.getValues()) )
-            }
-        });*/
+        /* In conflict, with ON CHANGE EVENT
+         this.$el.find('.selectize-control').on('click', function () {
+         if (self.status.ready === true) {
+         self._trigger(EVT.SELECTOR_SELECTED, $.extend({id: self.id}, self.getValues()) )
+         }
+         });*/
 
         this.$el.find(s.CLEAR_ALL_CONTAINER).on("click", function () {
             if (selectize) {
@@ -480,8 +491,12 @@ define([
     Dropdown.prototype._updateDropdown = function (data) {
 
         // Add Empty Option
-        if(this.selector.emptyOption.enabled){
-           data.splice(0,0,{value:this.selector.emptyOption.value,  text:this.selector.emptyOption.text,  parent:"#"});
+        if (this.selector.emptyOption.enabled) {
+            data.splice(0, 0, {
+                value: this.selector.emptyOption.value,
+                text: this.selector.emptyOption.text,
+                parent: "#"
+            });
         }
 
         var originalValue = this.getValues().values[0],
@@ -502,11 +517,11 @@ define([
         var v = from > originalValue ? from : originalValue;
 
         if (v) {
-            var found = _.find(data, function(option){
+            var found = _.find(data, function (option) {
                 return option.value === v
             });
 
-            if(found) {
+            if (found) {
                 instance.setValue(v.toString());
             }
             else {
@@ -532,9 +547,9 @@ define([
         var data = opts.data || [];
 
         // Add Empty Option
-       // if(this.selector.config.emptyOption.enabled){
-           // data.splice(0,0,{value:this.selector.emptyOption.value,  text:this.selector.emptyOption.text,  parent:"#"});
-       // }
+        // if(this.selector.config.emptyOption.enabled){
+        // data.splice(0,0,{value:this.selector.emptyOption.value,  text:this.selector.emptyOption.text,  parent:"#"});
+        // }
 
         this.setSource(data);
 

@@ -49,6 +49,8 @@ describe("Add", function () {
             } else {
                 var values = filter.getValues();
 
+                console.log(JSON.stringify(values))
+
                 expect(values.valid).to.be.true;
                 expect(values.values).to.have.property("added");
                 expect(values.values.added).to.be.an("array");
@@ -61,7 +63,7 @@ describe("Add", function () {
 
 });
 
-describe("Remove", function () {
+/*describe("Remove", function () {
 
     // inject the HTML for the tests
     beforeEach(function () {
@@ -152,4 +154,4 @@ describe("Remove", function () {
     });
 
 
-});
+});*/

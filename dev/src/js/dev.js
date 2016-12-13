@@ -181,8 +181,8 @@ define([
 
         $(s.AMIS_ADD_BTN).on("click", function () {
             console.log(filter.setValues({
-                values: {
-                    MicroDietaryComponents: ["13", "01"]
+                values : {
+                    dropdown : ["DZA", "ZAF", "Daniele"]
                 }
             }))
         });
