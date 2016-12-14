@@ -89,13 +89,13 @@ define([
 
         //this._createConfiguration();
 
-        this._renderModel2();
+        //this._renderModel2();
 
         //this._renderAmis();
 
         //this._renderDependencies();
 
-        //this._renderAll();
+        this._renderAll();
 
         return;
 

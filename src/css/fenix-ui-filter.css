@@ -5684,4 +5684,7 @@ input[type="radio"]:disabled + label {
 [data-group] .controller {
   opacity: 1; }
 
+.jstree-default .jstree-last {
+  background: none; }
+
 /*# sourceMappingURL=fenix-ui-filter.css.map */

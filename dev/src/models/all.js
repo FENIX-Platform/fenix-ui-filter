@@ -205,6 +205,34 @@ define([
                 }
             },
 
+            treeMulti: {
+
+                cl: {
+                    uid: "GIFT_FoodGroups"
+                },
+
+                selector: {
+                    id: "tree",
+                    hideFilter: true,
+                    hideButtons: true,
+                    hideSummary: true,
+                    default : ["01"],
+                    config: {
+                        core: {
+                            multiple: false
+                        },
+                        plugins: null
+
+                    }
+                },
+
+                template: {
+                    title: "Multiple selection",
+                    hideSwitch: false,
+                    hideRemoveButton: false
+                }
+            },
+
             dropdown: {
 
                 selector: {

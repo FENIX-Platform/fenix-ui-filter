@@ -622,6 +622,7 @@ $controller-elements-background: #bdbdbd;
   border: 1px solid $fenix-hr;
 }
 
+
 .fx-group-item{
   padding: 0 15px;
   margin-bottom: 20px;
@@ -640,4 +641,8 @@ $controller-elements-background: #bdbdbd;
   opacity: 1;
 }
 
+.jstree-default .jstree-last{
+  // review to apply only to specific element (fenix-ui-filter-utils)
+  background: none;
+}
 
