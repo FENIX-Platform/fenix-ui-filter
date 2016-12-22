@@ -822,7 +822,8 @@ define([
 
     Filter.prototype._resolveDependencySelectors = function (id) {
 
-        if (!id.startsWith("@")) {
+        // if (!id.startsWith("@"))
+        if(id.indexOf('@') < 0) {
             return [id]
         } else {
 
