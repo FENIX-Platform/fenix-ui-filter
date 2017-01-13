@@ -807,6 +807,8 @@ define([
             log.info(this._getCodelistCacheKey(obj) + " read from session storage.");
 
             return Q.Promise(function (resolve) {
+
+                console.log(stored)
                 resolve(stored);
             });
         }
@@ -844,6 +846,31 @@ define([
                 log.info("Code List loaded successfully for: " + key);
 
                 self._storeCodelist(body, data);
+
+                //format values
+                if (type === "distinct") {
+
+                    var dataType = obj.columnDataType;
+
+                    switch (dataType.toLowerCase()) {
+                        case "number" :
+                            data = _.map(data, function (d) {
+
+                                var title = {},
+                                    result = {};
+                                title[self.lang.toUpperCase()] = d.toString();
+
+                                result.code = d;
+                                result.title = title;
+
+                                return result
+
+                            });
+                            break;
+                        // extend with other cases
+                    }
+
+                }
 
                 return data;
 

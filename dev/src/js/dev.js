@@ -19,11 +19,14 @@ define([
     'dev/src/models/amis',
     'dev/src/models/time',
     'dev/src/models/uneca',
+    'dev/src/models/countrystat-1',
+    'dev/src/models/countrystat-2',
+    'dev/src/models/countrystat-3',
     'dev/src/html/model-1-base.hbs',
     'dev/src/nls/labels',
     'handlebars',
     'bootstrap'
-], function (log, $, _, Filter, Utils, Model1, AllModel, SemanticModel, FxResource, ModelToSync, TableTabModel, Process, AggregationModel, Model2, ModelDependencies, CountryStatModel, SetSourcesModel, AmisModel, TimeModel, UnecaModel, model1baseTemplate, i18nLabels, Handlebars) {
+], function (log, $, _, Filter, Utils, Model1, AllModel, SemanticModel, FxResource, ModelToSync, TableTabModel, Process, AggregationModel, Model2, ModelDependencies, CountryStatModel, SetSourcesModel, AmisModel, TimeModel, UnecaModel, Countrystat1model, Countrystat2model, Countrystat3model, model1baseTemplate, i18nLabels, Handlebars) {
 
 
     'use strict';
@@ -87,7 +90,7 @@ define([
 
     Dev.prototype._render = function () {
 
-        //this._createConfiguration();
+        this._createConfiguration();
 
         //this._renderModel2();
 
@@ -95,7 +98,7 @@ define([
 
         //this._renderDependencies();
 
-        this._renderAll();
+        //this._renderAll();
 
         return;
 
@@ -114,7 +117,6 @@ define([
         this._renderSynch();
 
     };
-
 
     Dev.prototype._renderDependencies = function () {
 
@@ -192,17 +194,16 @@ define([
     Dev.prototype._createConfiguration = function () {
 
         var configuration = Utils.createConfiguration({
-            model: UnecaModel
+            model: Countrystat3model,
+            //model: Countrystat2model,
+            //model: Countrystat1model,
+            //model: UnecaModel,
         }), model = {
-            id: s.FENIX_RESOURCE,
             selectors: this._createFilterConfiguration(configuration),
             el: s.FENIX_RESOURCE,
             summaryEl: s.FENIX_RESOURCE_SUMMARY
         };
-        /*
-         log.warn(model);
-         console.log(model);
-         */
+
         var filter = this.createFilter(model);
     };
 
