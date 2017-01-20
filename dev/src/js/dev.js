@@ -90,9 +90,9 @@ define([
 
     Dev.prototype._render = function () {
 
-        this._createConfiguration();
+        //this._createConfiguration();
 
-        //this._renderModel2();
+        this._renderModel2();
 
         //this._renderAmis();
 
