@@ -1,5 +1,3 @@
-/*global define*/
-
 define(function () {
 
     'use strict';
@@ -8,13 +6,15 @@ define(function () {
 
         validityTimeout: 10000, //10 secs
 
-        corePlugins : ['dropdown', 'tree', 'input', 'range', 'time', 'sortable'],
+        corePlugins : ['dropdown', 'tree', 'input', 'range', 'time', 'sortable', 'textarea'],
+
+        languages : ['EN', 'FR', 'ES', 'PR', 'AR', 'CZ'],
 
         pluginRegistry: { },
 
         // css class names
         focusedSelectorClassName: "focused", // highlight a selector
-        
+
         mandatorySelectorClassName: "mandatory", // mandatory selectors
         
         disabledSelectorClassName: "disabled", // disabled selectors

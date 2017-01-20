@@ -1,55 +1,45 @@
-<div>
-    <div data-tree-template>
+<div data-tree-template class="form-group">
 
-        <div class="selector-content">
+    <div class="selector-content">
 
-            {{#unless hideFilter}}
-                <input data-role="filter" type="text" class="form-control fx-tree-search" placeholder="{{search_placeholder}}">
-            {{/unless}}
+        {{#unless hideFilter}}
+            <input data-role="filter" type="text" class="form-control fx-tree-search" placeholder="{{search_placeholder}}">
+        {{/unless}}
 
-            <div class="tree-holder">
-                <div data-role="tree"></div>
+        <div class="tree-holder form-control">
+            <div data-role="tree"></div>
+        </div>
+
+
+        {{#unless hideButtons}}
+
+            <div class="btn-group btn-group-justified fx-tree-buttons">
+                {{#unless hideClearAllButton}}
+                    <div class="btn-group" role="group">
+                        <button data-role="clear" class="btn btn-default">{{ clear_all_btn }}</button>
+                    </div>
+                {{/unless}}
+                {{#unless hideSelectAllButton}}
+                    <div class="btn-group" role="group">
+                        <button data-role="select" class="btn btn-default">{{ select_all_btn }}</button>
+                    </div>
+                {{/unless}}
             </div>
 
+        {{/unless}}
 
-            {{#unless hideButtons}}
-
-                <div class="btn-group btn-group-justified fx-tree-buttons">
-                    {{#unless hideClearAllButton}}
-                        <div class="btn-group" role="group">
-                            <button data-role="clear" class="btn btn-default">{{ clear_all_btn }}</button>
-                        </div>
-                    {{/unless}}
-                    {{#unless hideSelectAllButton}}
-                        <div class="btn-group" role="group">
-                            <button data-role="select" class="btn btn-default">{{ select_all_btn }}</button>
-                        </div>
-                    {{/unless}}
-                </div>
-
-
-            {{/unless}}
-
-
-        </div>
-
-        <div class="selector-footer clearfix">
-
-            {{#unless hideFooter}}
-
-                {{#unless hideSummary}}
-                    <ul data-role="summary" class="list-unstyled"></ul>
-                {{/unless}}
-
-            {{/unless}}
-
-        </div>
     </div>
 
-    <div data-summary-item>
-        {{#each values}}
-            {{{this}}}
-        {{/each}}
+    <div class="selector-footer clearfix">
+
+        {{#unless hideFooter}}
+
+            {{#unless hideSummary}}
+                <ul data-role="summary" class="list-unstyled"></ul>
+            {{/unless}}
+
+        {{/unless}}
+
     </div>
 
 </div>

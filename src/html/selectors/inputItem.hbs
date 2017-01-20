@@ -1,0 +1,10 @@
+<li>
+    {{#if isCheckboxOrRadio}}
+        <input type="{{type}}" id="{{id}}" name="{{name}}" value="{{value}}">
+        <label for="{{id}}">{{label}}</label>
+    {{else}}
+        <input  {{#if readonly}} readonly {{/if}} type="{{type}}" id="{{id}}" name="{{name}}" value="{{value}}"
+                                 class="form-control" placeholder="{{placeholder}}" min="{{min}}" max="{{max}}">
+    {{/if}}
+
+</li>

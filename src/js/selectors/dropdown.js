@@ -1,30 +1,27 @@
-/*global define, Promise, amplify */
-
 define([
     "jquery",
     "loglevel",
     'underscore',
-    'fx-filter/config/errors',
-    'fx-filter/config/events',
-    'fx-filter/config/config',
-    'text!fx-filter/html/selectors/dropdown.hbs',
-    'i18n!fx-filter/nls/filter',
-    'handlebars',
-    'amplify',
+    '../../config/errors',
+    '../../config/events',
+    '../../config/config',
+    '../../html/selectors/dropdown.hbs',
+    '../../nls/labels',
     'selectize'
-], function ($, log, _, ERR, EVT, C, template, i18n, Handlebars) {
+], function ($, log, _, ERR, EVT, C, template, i18n) {
 
     'use strict';
 
     var defaultOptions = {
             selector: {
                 hideSelectAllButton: true,
-                hideClearAllButton : true,
-                emptyOption : {
+                hideClearAllButton: true,
+                emptyOption: {
                     enabled: false,
                     text: "All",
                     value: "all"
-                }
+                },
+                sort: true
             }
         },
         s = {
@@ -49,8 +46,10 @@ define([
 
         //force async execution
         window.setTimeout(function () {
+
             self.status.ready = true;
-            amplify.publish(self._getEventName(EVT.SELECTOR_READY), self);
+
+            self._trigger(EVT.SELECTOR_READY, {id: self.id});
 
         }, 0);
 
@@ -88,7 +87,7 @@ define([
      * getValues method
      * Mandatory method
      */
-    Dropdown.prototype.setSource = function ( source ) {
+    Dropdown.prototype.setSource = function (source) {
 
         var data = _.map(source, function (d) {
             return {
@@ -202,7 +201,14 @@ define([
      */
     Dropdown.prototype.setValue = function (v, silent) {
         log.info("Set dropdown value: " + JSON.stringify(v) + ". Silent? " + silent);
+
         var instance = this.dropdown[0].selectize;
+
+        _.each(v, function (i) {
+            console.log(i)
+            instance.addOption({value: i, text: i}, silent);
+        });
+
         instance.setValue(v, silent);
     };
 
@@ -217,8 +223,7 @@ define([
 
         if ($el.length === 0) {
             log.info("Injecting template for: " + this.id);
-            var tmpl = Handlebars.compile($(template)[0].outerHTML);
-            this.$el.append(tmpl($.extend(true, {}, i18n, this, this.selector)));
+            this.$el.append(template($.extend(true, {}, i18n[this.lang.toLowerCase()], this, this.selector)));
         }
 
     };
@@ -230,6 +235,10 @@ define([
         this.status.disabled = this.selector.disabled;
 
         this.$dropdownEl = this.$el.find(s.DROPDOWN_CONTAINER);
+
+        this.lang = this.lang.toUpperCase();
+
+        this.channels = {};
 
     };
 
@@ -257,6 +266,15 @@ define([
             }
         }
 
+        if (!!this.selector.sort) {
+            data = data.sort(
+                (typeof this.selector.sort === 'function') ? this.selector.sort : function (a, b) {
+                    if (a.text < b.text) return -1;
+                    if (a.text > b.text) return 1;
+                    return 0;
+                });
+        }
+
         return data;
     };
 
@@ -277,7 +295,7 @@ define([
 
                 data.push({
                     value: item.code,
-                    text: item.title[selector.lang],
+                    text: item.title[selector.lang] || item.title["EN"],
                     parent: parent || '#'
                 });
 
@@ -291,13 +309,6 @@ define([
             }
 
         }, this));
-
-        //order alphabetically
-        data = data.sort(function (a, b) {
-            if (a.text < b.text) return -1;
-            if (a.text > b.text) return 1;
-            return 0;
-        });
 
         return data;
     };
@@ -318,8 +329,8 @@ define([
         }
 
         // Add Empty Option
-        if(config.emptyOption.enabled){
-            data.splice(0,0,{value:config.emptyOption.value,  text:config.emptyOption.text,  parent:"#"});
+        if (config.emptyOption.enabled) {
+            data.splice(0, 0, {value: config.emptyOption.value, text: config.emptyOption.text, parent: "#"});
         }
 
         opt = $.extend(true, {}, selectize, {
@@ -333,23 +344,39 @@ define([
 
         this.dropdown = dropdown;
 
-        this.printDefaultSelection();
+        this.printDefaultSelection(data);
 
     };
 
-    Dropdown.prototype.printDefaultSelection = function () {
+    Dropdown.prototype.printDefaultSelection = function (data) {
 
-        return this._printDefaultSelection();
+        return this._printDefaultSelection(data);
     };
 
-    Dropdown.prototype._printDefaultSelection = function () {
+    Dropdown.prototype._printDefaultSelection = function (data) {
 
         var config = this.selector,
             instance = this.dropdown[0].selectize;
 
         if (config.default) {
-            //print default values
-            instance.setValue(config.default);
+
+            if (data) {
+                //check for default value
+                var found = _.find(data, function (option) {
+                    return option.value.toString() === config.default[0].toString();
+                });
+
+                //print default values
+                if (found){
+                    this.setValue(config.default);
+                } else if (config.emptyOption && config.emptyOption.value){
+                    instance.setValue(config.emptyOption.value);
+                }
+
+            } else {
+                //print default values
+                this.setValue(config.default);
+            }
         }
 
     };
@@ -358,7 +385,6 @@ define([
 
         var instance = this.dropdown[0].selectize;
 
-        //print default values
         instance.destroy();
 
         log.info("Destroyed dropdown: " + this.id);
@@ -387,18 +413,18 @@ define([
                     });
                 });
 
-                amplify.publish(self._getEventName(EVT.SELECTORS_ITEM_SELECT + self.id), result);
-                amplify.publish(self._getEventName(EVT.SELECTORS_ITEM_SELECT), {id: self.id, values: self.getValues()});
+                self._trigger(EVT.SELECTOR_SELECTED, $.extend({id: self.id}, self.getValues()))
+
             }
-            
+
         });
 
-
-        this.$el.find('.selectize-control').on('click', function () {
-            if (self.status.ready === true) {
-                amplify.publish(self._getEventName(EVT.SELECTORS_ITEM_CLICK), {id: self.id});
-            }
-        });
+        /* In conflict, with ON CHANGE EVENT
+         this.$el.find('.selectize-control').on('click', function () {
+         if (self.status.ready === true) {
+         self._trigger(EVT.SELECTOR_SELECTED, $.extend({id: self.id}, self.getValues()) )
+         }
+         });*/
 
         this.$el.find(s.CLEAR_ALL_CONTAINER).on("click", function () {
             if (selectize) {
@@ -429,6 +455,8 @@ define([
 
         this._destroyDropdown();
 
+        this.$el.empty();
+
     };
 
     Dropdown.prototype._getEventName = function (evt) {
@@ -438,11 +466,10 @@ define([
 
     // dependency handler
 
-
     Dropdown.prototype._dep_min = function (opts) {
 
-        var codes = opts.data.length > 0 ? opts.data : [{value: this.selector.from || 0}],
-            from = codes[0].value,
+        var codes = opts.data && Array.isArray(opts.data.values) && opts.data.values.length > 0 ? opts.data.values : [{value: this.selector.from || 0}],
+            from = codes[0],
             data = [];
 
         if (!this.selector.to) {
@@ -464,8 +491,12 @@ define([
     Dropdown.prototype._updateDropdown = function (data) {
 
         // Add Empty Option
-        if(this.selector.emptyOption.enabled){
-           data.splice(0,0,{value:this.selector.emptyOption.value,  text:this.selector.emptyOption.text,  parent:"#"});
+        if (this.selector.emptyOption.enabled) {
+            data.splice(0, 0, {
+                value: this.selector.emptyOption.value,
+                text: this.selector.emptyOption.text,
+                parent: "#"
+            });
         }
 
         var originalValue = this.getValues().values[0],
@@ -486,16 +517,18 @@ define([
         var v = from > originalValue ? from : originalValue;
 
         if (v) {
-            var found = _.find(data, function(option){
+            var found = _.find(data, function (option) {
                 return option.value === v
             });
 
-            if(found) {
+            if (found) {
                 instance.setValue(v.toString());
             }
             else {
-                this.printDefaultSelection();
+                this.printDefaultSelection(data);
             }
+        } else {
+            this.printDefaultSelection(data);
         }
 
     };
@@ -514,12 +547,39 @@ define([
         var data = opts.data || [];
 
         // Add Empty Option
-       // if(this.selector.config.emptyOption.enabled){
-           // data.splice(0,0,{value:this.selector.emptyOption.value,  text:this.selector.emptyOption.text,  parent:"#"});
-       // }
+        // if(this.selector.config.emptyOption.enabled){
+        // data.splice(0,0,{value:this.selector.emptyOption.value,  text:this.selector.emptyOption.text,  parent:"#"});
+        // }
 
         this.setSource(data);
 
+    };
+
+    /**
+     * pub/sub
+     * @return {Object} component instance
+     */
+    Dropdown.prototype.on = function (channel, fn, context) {
+        var _context = context || this;
+        if (!this.channels[channel]) {
+            this.channels[channel] = [];
+        }
+        this.channels[channel].push({context: _context, callback: fn});
+        return this;
+    };
+
+    Dropdown.prototype._trigger = function (channel) {
+
+        if (!this.channels[channel]) {
+            return false;
+        }
+        var args = Array.prototype.slice.call(arguments, 1);
+        for (var i = 0, l = this.channels[channel].length; i < l; i++) {
+            var subscription = this.channels[channel][i];
+            subscription.callback.apply(subscription.context, args);
+        }
+
+        return this;
     };
 
     return Dropdown;

@@ -1,16 +1,13 @@
-/*global define, Promise, amplify */
-
 define([
     "jquery",
     "loglevel",
     'underscore',
-    'fx-filter/config/errors',
-    'fx-filter/config/events',
-    'fx-filter/config/config',
+    '../../config/errors',
+    '../../config/events',
+    '../../config/config',
     "moment",
-    "ion.rangeSlider",
-    "amplify"
-], function ($, log, _, ERR, EVT, C, moment) {
+    "ion-rangeslider"
+], function ($, log, _, ERR, EVT, C, Moment) {
 
     'use strict';
 
@@ -39,11 +36,22 @@ define([
 
             self.status.ready = true;
 
-            amplify.publish(self._getEventName(EVT.SELECTOR_READY), self);
+            self._trigger(EVT.SELECTOR_READY, {id: self.id});
+
         }, 0);
 
         return this;
     }
+
+    /**
+     * update method
+     * Mandatory method
+     */
+    Range.prototype.update = function( opts ) {
+
+        var slider = this.$rangeContainer.data("ionRangeSlider");
+        slider.update(opts);
+    };
 
     /**
      * getValues method
@@ -59,7 +67,7 @@ define([
             },
             from, to;
 
-        from = this.selector.format ? moment(values.from,"X").format(this.selector.format) : values.from;
+        from = this.selector.format ? Moment(values.from, "X").format(this.selector.format) : values.from;
 
         //add always from
         result.values.push(from);
@@ -68,8 +76,8 @@ define([
         //add to is double slider
         if (this.selector.config && this.selector.config.type === "double") {
             result.values = [];
-            to = this.selector.format ? moment(values.to,"X").format(this.selector.format) : values.to;
-            from = this.selector.format ? moment(values.from,"X").format(this.selector.format) : values.from;
+            to = this.selector.format ? Moment(values.to, "X").format(this.selector.format) : values.to;
+            from = this.selector.format ? Moment(values.from, "X").format(this.selector.format) : values.from;
 
             result.values.push({value: to, parent: 'to'});
             result.values.push({value: from, parent: 'from'});
@@ -224,7 +232,6 @@ define([
     };
 
     Range.prototype._checkConfiguration = function () {
-
     };
 
     Range.prototype._getStatus = function () {
@@ -247,6 +254,8 @@ define([
         this.status.disabled = this.selector.disabled;
 
         this.values = [];
+
+        this.channels = {};
 
         this.$rangeContainer = this.$el.find("[data-selector-range]");
 
@@ -280,8 +289,7 @@ define([
             onChange: _.bind(function (data) {
 
                 if (this.status.ready === true) {
-                    //amplify.publish(self._getEventName(EVT.SELECTORS_ITEM_SELECT + this.id), data); //format payload
-                    amplify.publish(self._getEventName(EVT.SELECTORS_ITEM_SELECT));
+                    self._trigger(EVT.SELECTOR_SELECTED, $.extend({id: self.id}, self.getValues()) )
 
                     delete this.silentMode;
                 }
@@ -295,7 +303,7 @@ define([
 
                     //workaround for silent change
                     if (this.silentMode !== true) {
-                        amplify.publish(self._getEventName(EVT.SELECTORS_ITEM_SELECT));
+                        self._trigger(EVT.SELECTOR_SELECTED, $.extend({id: self.id}, self.getValues()) );
                     }
 
                     delete this.silentMode;
@@ -303,7 +311,6 @@ define([
 
             }, self)
         }, this.selector.config));
-
 
     };
 
@@ -332,13 +339,46 @@ define([
 
         this._unbindEventListeners();
 
-        this.$rangeContainer.data("ionRangeSlider").destroy();
+        if (this.$rangeContainer.data("ionRangeSlider")) {
+            //TODO check destroy
+            this.$rangeContainer.data("ionRangeSlider").destroy();
+        }
+
+        this.$el.empty();
+
     };
 
     // dependency handler
 
     Range.prototype._dep_ensure_unset = function (opts) {
         log.warn("_dep_ensure_unset method not implemented for range selector");
+    };
+
+    /**
+     * pub/sub
+     * @return {Object} component instance
+     */
+    Range.prototype.on = function (channel, fn, context) {
+        var _context = context || this;
+        if (!this.channels[channel]) {
+            this.channels[channel] = [];
+        }
+        this.channels[channel].push({context: _context, callback: fn});
+        return this;
+    };
+
+    Range.prototype._trigger = function (channel) {
+
+        if (!this.channels[channel]) {
+            return false;
+        }
+        var args = Array.prototype.slice.call(arguments, 1);
+        for (var i = 0, l = this.channels[channel].length; i < l; i++) {
+            var subscription = this.channels[channel][i];
+            subscription.callback.apply(subscription.context, args);
+        }
+
+        return this;
     };
 
     return Range;

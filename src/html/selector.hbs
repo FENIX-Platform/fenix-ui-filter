@@ -1,0 +1,66 @@
+<div class="fx-selector {{classNames}}">
+
+    {{#unless hideHeader}}
+
+        <div data-selector-header class="selector-header clearfix">
+
+            {{#unless hideTitle}}
+
+                <h5 class="truncate fx-selector-title">{{ title }}
+
+                    {{#unless hideHeaderIcon}}
+
+                        {{#if headerIconTooltip}}
+                            <span class="{{headerIconClassName}}" title="{{headerIconTooltip}}"></span>
+                        {{else}}
+                            <span class="{{headerIconClassName}}"></span>
+                        {{/if}}
+
+                    {{/unless}}
+
+                </h5>
+
+            {{/unless}}
+
+            {{#unless hideDescription}}
+
+                <small> {{{description}}}  </small>
+
+            {{/unless}}
+
+            <div class="btn-group controller" role="group">
+
+                {{#unless hideSwitch}}
+
+                    <div class="btn-group" role="group">
+                        <input type="checkbox" id="switch-{{id}}" name="disable-selector" data-target="{{id}}"
+                               data-type="switch" data-role="switch" checked>
+                        <label class="filter-enabled-label" for="switch-{{id}}">{{enable_filter}}</label>
+                    </div>
+
+                {{/unless}}
+
+                {{#unless hideRemoveButton}}
+
+                    <button data-role="remove" class="btn btn-default btn-round" type="button"
+                            title="{{ tooltip_remove_selector }}">
+                        <span class="fx-icon fx-icon-close" aria-hidden="true"></span>
+                    </button>
+
+                {{/unless}}
+
+            </div>
+
+        </div>
+
+    {{/unless}}
+
+    <div data-el></div>
+
+    {{#unless hideFooter}}
+
+        <small> {{{footer}}} </small>
+
+    {{/unless}}
+
+</div>

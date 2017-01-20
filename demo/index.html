@@ -14,15 +14,15 @@
     <meta name="author" content="Nicola Selleri <nicola.selleri [at] fao.org>">
 
     <link rel="stylesheet" href="http://fenixrepo.fao.org/cdn/js/bootstrap/3.3.4/css/bootstrap.min.css">
-    <!-- dropdown selector -->
+    <!-- dropdown item -->
     <link rel="stylesheet" href="http://fenixrepo.fao.org/cdn/js/selectize/0.12.1/css/selectize.bootstrap3.css"/>
-    <!-- tree selector -->
+    <!-- tree item -->
     <link rel="stylesheet" href='http://fenixrepo.fao.org/cdn/js/jstree/3.3.0/dist/themes/default/style.min.css'>
-    <!-- range selector -->
+    <!-- range item -->
     <link rel="stylesheet" href='http://fenixrepo.fao.org/cdn/js/ion.rangeSlider/2.1.2/css/ion.rangeSlider.css'>
     <link rel="stylesheet"
           href='http://fenixrepo.fao.org/cdn/js/ion.rangeSlider/2.1.2/css/ion.rangeSlider.skinHTML5.css'>
-    <!-- time selector -->
+    <!-- time item -->
     <link rel="stylesheet"
           href='http://fenixrepo.fao.org/cdn/js/bootstrap-datetimepicker/4.17.37/build/css/bootstrap-datetimepicker.min.css'>
     <link rel="stylesheet" href='http://fenixrepo.fao.org/cdn/js/bootstrap-daterangepicker/2.1.19/daterangepicker.css'>
@@ -30,7 +30,7 @@
     <!-- Fonts -->
     <link href='https://fonts.googleapis.com/css?family=Roboto:400,100,300,700,500,900,400italic' rel='stylesheet' type='text/css'>
 
-    <link rel="stylesheet" href="css/demo.css">
+    <link href='../dist/fenix-ui-filter.min.css' rel='stylesheet' type='text/css'>
 
 </head>
 <body>
@@ -101,7 +101,7 @@
                     <div class="col-md-3"><div data-selector="tree" class="panel"></div></div>
 
                     <!-- NB data-semantic instead of data-selector-->
-                    <div class="col-md-3"><div data-semantic="treeTriple" class="panel"></div></div>
+                    <div class="col-md-3"><div data-group="treeTriple" class="panel"></div></div>
 
                     <div class="col-md-3"><div data-selector="treeDisabled" class="panel"></div></div>
 
@@ -172,7 +172,5 @@
     </div>
 </div>
 
-<script data-main="demo" src="//fenixrepo.fao.org/cdn/js/requirejs/2.1.15/require.min.js"></script>
-
-</body>
+<script type="text/javascript" src="./index.js"></script></body>
 </html>

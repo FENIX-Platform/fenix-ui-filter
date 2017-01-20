@@ -1,4 +1,3 @@
-/*global define*/
 define(function () {
 
     'use strict';
@@ -7,13 +6,13 @@ define(function () {
 
     return {
 
-        SELECTORS_READY: prefix + "selectors.ready",
-        SELECTORS_ITEM_SELECT: prefix + "selectors.select.",
-        SELECTORS_ITEM_CLICK: prefix + "selectors.click.",
+        FILTER_READY: prefix + "selectors.ready",
+        SELECTOR_CLICKED: prefix + "selectors.clicked",
+        SELECTOR_SELECTED: prefix + "selectors.selected",
         SELECTOR_READY: prefix + "selector.ready",
-        SELECTOR_DISABLED: prefix + "selector.disabled.",
-        SELECTOR_ENABLED: prefix + "selector.enabled.",
-        ITEM_REMOVED: prefix + "selector.removed.",
+        SELECTOR_DISABLED: prefix + "selector.disabled",
+        SELECTOR_ENABLED: prefix + "selector.enabled",
+        SELECTOR_REMOVED: prefix + "selector.removed"
 
     };
 });

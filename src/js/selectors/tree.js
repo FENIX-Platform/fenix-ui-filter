@@ -1,18 +1,15 @@
-/*global define, Promise, amplify */
-
 define([
     "jquery",
     "loglevel",
     'underscore',
-    'fx-filter/config/errors',
-    'fx-filter/config/events',
-    'fx-filter/config/config',
-    'handlebars',
-    'i18n!fx-filter/nls/filter',
-    'text!fx-filter/html/selectors/tree.hbs',
-    "amplify",
+    '../../config/errors',
+    '../../config/events',
+    '../../config/config',
+    '../../nls/labels',
+    '../../html/selectors/tree.hbs',
+    '../../html/selectors/treeItem.hbs',
     "jstree"
-], function ($, log, _, ERR, EVT, C, Handlebars, i18n, template) {
+], function ($, log, _, ERR, EVT, C, i18n, template, templateItem) {
 
     'use strict';
 
@@ -64,7 +61,6 @@ define([
             _.each(result.values, function (c) {
                 result.labels[c] = instance.get_node(c).text;
             });
-
         }
 
         return result;
@@ -80,6 +76,17 @@ define([
         this.printDefaultSelection();
 
         log.info("Selector reset successfully");
+    };
+
+    /**
+     * printDefaultSelection
+     * Mandatory method
+     */
+    Tree.prototype.printDefaultSelection = function () {
+
+        this.printDefaultSelection();
+
+        log.info("Selector printDefaultSelection successfully");
     };
 
     /**
@@ -204,6 +211,8 @@ define([
             log.warn("Selector is disabled. Impossible to unset tree value: " + v);
         }
 
+        this._updateSummary();
+
     };
 
     /**
@@ -233,8 +242,8 @@ define([
         if ($el.length === 0) {
 
             log.info("Injecting template for: " + this.id);
-            var tmpl = Handlebars.compile($(template).find(s.TEMPLATE_TREE)[0].outerHTML);
-            this.$el.append(tmpl($.extend(true, {}, i18n, this, this.selector)));
+
+            this.$el.append(template($.extend(true, {}, i18n[this.lang.toLowerCase()], this, this.selector)));
         }
 
     };
@@ -247,6 +256,10 @@ define([
         this.status = {};
 
         this.status.disabled = this.selector.disabled;
+
+        this.channels = {};
+
+        this.lang = this.lang.toUpperCase();
 
     };
 
@@ -285,6 +298,17 @@ define([
                 });
             }
         }
+
+        if (!!this.selector.sort) {
+            data = data.sort(
+                (typeof this.selector.sort === 'function') ? this.selector.sort : function (a, b) {
+                    if (a.text < b.text) return -1;
+                    if (a.text > b.text) return 1;
+                    return 0;
+                });
+
+        }
+
         return data;
     };
 
@@ -305,7 +329,7 @@ define([
 
                 data.push({
                     id: item.code,
-                    text: item.title[selector.lang],
+                    text: item.title[selector.lang] || item.title["EN"],
                     parent: parent || '#'
                 });
 
@@ -320,13 +344,6 @@ define([
             }
 
         }, this));
-
-        //order alphabetically
-        data = data.sort(function (a, b) {
-            if (a.text < b.text) return -1;
-            if (a.text > b.text) return 1;
-            return 0;
-        });
 
         return data;
     };
@@ -343,7 +360,7 @@ define([
                 this.status.ready = true;
 
                 //Always async
-                amplify.publish(this._getEventName(EVT.SELECTOR_READY), this);
+                this._trigger(EVT.SELECTOR_READY, {id: this.id});
 
             }, this))
 
@@ -482,7 +499,6 @@ define([
         }
 
         cb(data);
-
     };
 
     Tree.prototype._getChildrenItems = function (config, node, cb) {
@@ -490,12 +506,11 @@ define([
         var self = this,
             body = $.extend(true, {}, this.cl, {
                 levels: 2,
-                codes: [node.id]
+                codes: [node.id],
+                initialized : true
             });
 
-        delete body.level;
-
-        this.controller.getCodelist(body)
+        this.controller.getExternalResource(body)
             .then(function (data) {
                 var model = self._buildTreeModel(data[0].children || [], node.id);
                 cb(model);
@@ -532,8 +547,7 @@ define([
 
         this._updateSummary();
 
-        amplify.publish(this._getEventName(EVT.SELECTORS_ITEM_SELECT), {id: this.id, values: this.getValues()});
-        amplify.publish(this._getEventName(EVT.SELECTORS_ITEM_SELECT + this.id), payload);
+        this._trigger(EVT.SELECTOR_SELECTED, $.extend({id: self.id }, self.getValues()) )
 
     };
 
@@ -559,9 +573,7 @@ define([
             $(this).off();
         });
 
-        var tmpl = Handlebars.compile($(template).find(s.TEMPLATE_SUMMARY_ITEM)[0].outerHTML);
-
-        this.$summaryItems = $(tmpl({values: model}));
+        this.$summaryItems = $(templateItem({values: model}));
 
         //bind click listener
         this.$summaryItems.each(function () {
@@ -623,15 +635,17 @@ define([
         var config = this.selector,
             tree = this.tree.jstree(true);
 
-        if (config.default && Array.isArray(config.default) && $.isFunction(tree.select_node) && $.isFunction(tree.deselect_all)) {
+        //clear current selection
+        tree.deselect_all(true);
 
-            //clear current selection
-            tree.deselect_all(true);
+        if (config.default && Array.isArray(config.default) && $.isFunction(tree.select_node) && $.isFunction(tree.deselect_all)) {
 
             _.each(config.default, function (k) {
                 tree.select_node(k)
             });
         }
+
+        this._updateSummary();
 
     };
 
@@ -645,6 +659,8 @@ define([
 
         $container.find(s.CLEAR_ALL_CONTAINER).off();
 
+        $container.empty();
+
         log.info("Destroyed tree: " + this.id);
     };
 
@@ -654,6 +670,33 @@ define([
 
         this.setDomain(opts);
 
+    };
+
+    /**
+     * pub/sub
+     * @return {Object} component instance
+     */
+    Tree.prototype.on = function (channel, fn, context) {
+        var _context = context || this;
+        if (!this.channels[channel]) {
+            this.channels[channel] = [];
+        }
+        this.channels[channel].push({context: _context, callback: fn});
+        return this;
+    };
+
+    Tree.prototype._trigger = function (channel) {
+
+        if (!this.channels[channel]) {
+            return false;
+        }
+        var args = Array.prototype.slice.call(arguments, 1);
+        for (var i = 0, l = this.channels[channel].length; i < l; i++) {
+            var subscription = this.channels[channel][i];
+            subscription.callback.apply(subscription.context, args);
+        }
+
+        return this;
     };
 
     return Tree;

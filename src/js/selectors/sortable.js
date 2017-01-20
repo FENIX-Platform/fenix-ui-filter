@@ -1,24 +1,21 @@
-/*global define, Promise, amplify */
-
 define([
     "jquery",
     "loglevel",
     'underscore',
-    'text!fx-filter/html/selectors/sortable.hbs',
-    'fx-filter/config/errors',
-    'fx-filter/config/events',
-    'fx-filter/config/config',
-    'handlebars',
-    'sortable',
-    "amplify"
-], function ($, log, _, templates, ERR, EVT, C, Handlebars, SortableJS) {
+    '../../html/selectors/sortableList.hbs',
+    '../../html/selectors/sortableItem.hbs',
+    '../../config/errors',
+    '../../config/events',
+    '../../config/config',
+    'sortablejs'
+], function ($, log, _, templateList, templateItem, ERR, EVT, C, SortableJS) {
 
     'use strict';
 
     var defaultOptions = {
             checkableInputs: ["radio", "checkbox"],
-            itemRender : function ( params ) {
-                return this._itemRender(params);
+            selectorRender: function (params) {
+                return this._selectorRender(params);
             }
         },
         s = {
@@ -30,7 +27,7 @@ define([
 
         var self = this;
 
-        $.extend(true, this, defaultOptions, o, {$el : $(o.el)});
+        $.extend(true, this, defaultOptions, o, {$el: $(o.el)});
 
         this._initVariables();
 
@@ -41,7 +38,7 @@ define([
 
             self.status.ready = true;
 
-            amplify.publish(self._getEventName(EVT.SELECTOR_READY), self);
+            self._trigger(EVT.SELECTOR_READY, {id: self.id});
         }, 0);
 
         return this;
@@ -65,13 +62,13 @@ define([
 
             _.each(values, _.bind(function (item) {
 
-                var label =  this.$el.find(s.TEMPLATE_LIST).filter('[data-group="' + name + '"]')
+                var label = this.$el.find(s.TEMPLATE_LIST).filter('[data-sortable-group="' + name + '"]')
                     .find(s.TEMPLATE_ITEM).filter('[data-id="' + item + '"]').text().trim();
 
                 result.values.push({
                     value: item,
                     parent: name,
-                    label : label
+                    label: label
                 });
 
                 result.labels[item] = label;
@@ -253,24 +250,21 @@ define([
             groupsObjs = v || this.groups,
             groups = Object.keys(this.groups),
             group,
-            $list,
-            item = $(templates).find(s.TEMPLATE_ITEM)[0].outerHTML,
-            list = $(templates).find(s.TEMPLATE_LIST)[0].outerHTML;
+            $list;
 
         //loop over groups
         _.each(groups, _.bind(function (name) {
 
-            $list = this.$el.find(s.TEMPLATE_LIST).filter('[data-group="' + name + '"]');
+            $list = this.$el.find(s.TEMPLATE_LIST).filter('[data-sortable-group="' + name + '"]');
 
             if ($list.length === 0) {
                 log.info("Injecting sortable list");
 
-                var tmplGroup = Handlebars.compile(list),
-                    m = {
+                var m = {
                         group: name,
                         label: groupsObjs[name].label
                     },
-                    $group = $(tmplGroup(m));
+                    $group = $(templateList(m));
 
                 this.$el.append($group);
 
@@ -283,9 +277,8 @@ define([
             //loop over groups' items
             _.each(group.items, _.bind(function (i) {
 
-                var tmpl = Handlebars.compile(item),
-                    $content = this.itemRender.call(this, i),
-                    $li = $(tmpl(i));
+                var $content = this.selectorRender.call(this, i),
+                    $li = $(templateItem(i));
 
                 $li.html($content);
 
@@ -321,13 +314,17 @@ define([
                             //workaround for silent change
                             if (this.silentMode !== true) {
 
-                                amplify.publish(self._getEventName(EVT.SELECTORS_ITEM_SELECT + self.id), {
-                                    value: $itemEl.data('id'),
-                                    label: $itemEl.text(),
-                                    parent: name
+                                var value = $itemEl.data('id'),
+                                    labels = {};
+
+                                labels[value] = $itemEl.text();
+
+                                this._trigger(EVT.SELECTOR_SELECTED, {
+                                    id: this.id,
+                                    values: [value],
+                                    labels:labels
                                 });
 
-                                amplify.publish(self._getEventName(EVT.SELECTORS_ITEM_SELECT));
                             }
                             delete this.silentMode;
 
@@ -340,7 +337,7 @@ define([
 
     };
 
-    Sortable.prototype._itemRender = function ( model ) {
+    Sortable.prototype._selectorRender = function (model) {
 
         return model.label || "Missing label";
 
@@ -357,8 +354,10 @@ define([
         this.status = {};
         this.status.disabled = this.selector.disabled;
 
-        if (this.selector.hasOwnProperty("config") && $.isFunction(this.selector.config.itemRender)) {
-            this.itemRender = this.selector.config.itemRender;
+        this.channels = {};
+
+        if (this.selector.hasOwnProperty("config") && $.isFunction(this.selector.config.selectorRender)) {
+            this.selectorRender = this.selector.config.selectorRender;
         }
 
     };
@@ -402,10 +401,12 @@ define([
 
         _.each(this.groups, _.bind(function (obj, name) {
 
-            $list = this.$el.find(s.TEMPLATE_LIST).filter('[data-group="' + name + '"]');
+            $list = this.$el.find(s.TEMPLATE_LIST).filter('[data-sortable-group="' + name + '"]');
             $list.empty();
 
         }, this));
+
+        this.$el.empty();
 
     };
 
@@ -414,6 +415,33 @@ define([
     Sortable.prototype._dep_ensure_unset = function (opts) {
 
         log.warn('TODO implement: Sortable selector from FENIX filter');
+    };
+
+    /**
+     * pub/sub
+     * @return {Object} component instance
+     */
+    Sortable.prototype.on = function (channel, fn, context) {
+        var _context = context || this;
+        if (!this.channels[channel]) {
+            this.channels[channel] = [];
+        }
+        this.channels[channel].push({context: _context, callback: fn});
+        return this;
+    };
+
+    Sortable.prototype._trigger = function (channel) {
+
+        if (!this.channels[channel]) {
+            return false;
+        }
+        var args = Array.prototype.slice.call(arguments, 1);
+        for (var i = 0, l = this.channels[channel].length; i < l; i++) {
+            var subscription = this.channels[channel][i];
+            subscription.callback.apply(subscription.context, args);
+        }
+
+        return this;
     };
 
     return Sortable;

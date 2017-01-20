@@ -1,142 +1,165 @@
-NODE_ENV = process.env.NODE_ENV;
-
 var distFolderPath = "dist",
+    demoFolderPath = "demo",
+    devFolderPath = "dev",
     webpack = require('webpack'),
     packageJson = require("./package.json"),
-    Path = require('path'),
-    //plugins
-    CleanWebpackPlugin = require('clean-webpack-plugin'),
-    HtmlWebpackPlugin = require('html-webpack-plugin'),
     ExtractTextPlugin = require("extract-text-webpack-plugin"),
-    //configuration
-    languages = ["en"/*, "it"*/],
-    production = NODE_ENV === "test" ? false : true,
-    plugins = [
-        //clean dist folder before build
-        new CleanWebpackPlugin(['dist'], {
-            //root: '/full/project/path',
-            //verbose: true,
-            //dry: false
-        }),
-        // create native css output file
-        new ExtractTextPlugin("style.[hash].css", {
-            allChunks: true
-        }),
-        // compile index.html from template and inject hashed js
-        new HtmlWebpackPlugin({
-            filename: "index.html",
+    HtmlWebpackPlugin = require('html-webpack-plugin'),
+    CleanWebpackPlugin = require('clean-webpack-plugin'),
+    Path = require('path'),
+    dependencies = Object.keys(packageJson.dependencies);
+
+module.exports = {
+
+    debug: isProduction(false, true),
+
+    devtool: isProduction('source-map', 'eval'),
+
+    entry: getEntry(),
+
+    output: getOutput(),
+
+    resolve: {
+        root: Path.resolve(__dirname),
+        alias: {
+            handlebars: Path.join(__dirname, 'node_modules/handlebars/dist/handlebars.js'),
+            jquery: Path.join(__dirname, 'node_modules/jquery/dist/jquery') //needed by eonasdan-bootstrap-datetimepicker
+        }
+    },
+
+    externals: isProduction(dependencies, undefined),
+
+    module: {
+        loaders: [
+            isProduction(
+                {test: /\.css$/, loader: ExtractTextPlugin.extract("style-loader", "css-loader")},
+                {test: /\.css$/, loader: "style-loader!css-loader"}
+            ),
+            {test: /\.hbs$/, loader: "handlebars-loader"},
+            {test: /\.png$/, loader: "url-loader?limit=100000"},
+            {test: /\.jpg$/, loader: "file-loader?name=[name].[ext]&limit=100000"},
+            {test: /\.svg/, loader: "file-loader?name=[name].[ext]&limit=100000"},
+            {test: /\.gif/, loader: "file-loader?name=[name].[ext]&limit=100000"},
+
+            //Bootstrap loader
+            {test: /bootstrap\/js\//, loader: 'imports?jQuery=jquery'},
+            {test: /\.woff(\?v=\d+\.\d+\.\d+)?$/, loader: "url?limit=10000&minetype=application/font-woff"},
+            {test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/, loader: "url?limit=10000&minetype=application/font-woff"},
+            {test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, loader: "url?limit=10000&minetype=application/octet-stream"},
+            {test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: "file"}
+        ]
+    },
+
+    plugins: clearArray([
+        new webpack.ProvidePlugin({$: "jquery", jQuery: "jquery"}),
+        isProduction(new CleanWebpackPlugin([distFolderPath]), undefined),
+        isProduction(new webpack.optimize.UglifyJsPlugin({
+            compress: {warnings: false},
+            output: {comments: false}
+        })),
+        isProduction(new ExtractTextPlugin(packageJson.name + '.min.css')),
+        isDevelop(new HtmlWebpackPlugin({
             inject: "body",
-            template: "./index.template.html"
-        }),
-    ],
-    entry = {};
+            template: devFolderPath + "/index.template.html"
+        }))
+    ])
+};
 
-// plugins included only in production environment
-if (production) {
+function getEntry() {
 
-    plugins = plugins.concat([
-        // vendor in a separate bundle, hash for long term cache
-        new webpack.optimize.CommonsChunkPlugin({
-            name: "vendor",
-            filename: "vendor.[hash].js",
-            chucks: ["vendor"]
-        }),
-        //Merge small chunks that are lower than this min size (in chars)
-        new webpack.optimize.MinChunkSizePlugin({
-            minChunkSize: 51200, // ~50kb
-        }),
-        /*new webpack.optimize.AggressiveMergingPlugin({
-         minSizeReduce: 1.5,
-         //moveToParents: true,
-         //entryChunkMultiplicator: 10
-         }),*/
-        // uglify
-        new webpack.optimize.UglifyJsPlugin({
-            compress: {
-                warnings: false,
-            },
-            output: {
-                comments: false,
-            },
-        }),
-    ]);
+    var entry = {};
 
-    // add entry for vendor bundle
-    entry["vendor"] = ['jquery']; //add every vendor here
+    switch (getEnvironment()) {
+
+        case "demo" :
+            entry["app"] = ["demo/src/js/demo.js"];
+            break;
+        case "develop" :
+            entry["app"] = ["dev/src/js/dev.js"];
+            break;
+        default :
+            entry["app"] = ["./src/js/index.js"];
+    }
+
+    return entry;
+}
+
+function getOutput() {
+
+    var output;
+
+    switch (getEnvironment()) {
+
+        case "demo" :
+            output = {
+                path: Path.join(__dirname, demoFolderPath),
+                filename: "index.js"
+            };
+            break;
+        case "production" :
+            output = {
+                path: Path.join(__dirname, distFolderPath),
+                filename: packageJson.name + '.min.js',
+                chunkFilename: 'chunk-[id].' + packageJson.name + '.min.js',
+                libraryTarget: 'amd'
+            };
+            break;
+        case "develop" :
+            output = {
+                path: Path.join(__dirname, devFolderPath),
+                //publicPath: "/dev/",
+                filename: "index.js"
+            };
+            break;
+        default :
+            output = {
+                path: Path.join(__dirname, distFolderPath),
+                filename: "index.js"
+            };
+            break;
+    }
+
+    return output;
+}
+
+// utils
+
+function clearArray(array) {
+
+    var result = [];
+
+    array.forEach(function (s) {
+        s ? result.push(s) : null;
+    });
+
+    return result;
 
 }
 
-entry["app"] = ['./src/js/filter.js'];
+function isProduction(valid, invalid) {
 
-module.exports = languages.map(function (lang) {
+    return isEnvironment('production') ? valid : invalid;
+}
 
-    return {
-        debug: !production, //switch loader to debug mode
-        devtool: production ? false : 'eval', //source map generation
-        entry: entry,
-        output: {
-            path: Path.join(__dirname, distFolderPath, lang),
-            //hash for long term cache
-            filename: production ? 'bundle.[hash].js' : "bundle.js",
-            chunkFilename: 'chunk-[id].[hash].js'
-        },
-        resolve: {
-            root: Path.resolve(__dirname),
-            alias: {
-                module : "bundle.[hash].js",
-                css: 'src/css',
-                'fx-filter' : 'src'
+function isDevelop(valid, invalid) {
 
-                //'fx-filter/nls': 'submodules/module_nls/src/nls/' + lang + "/",
-                //'fx-filter': 'submodules/module_nls/src',
+    return isEnvironment('develop') ? valid : invalid;
+}
 
-            }
-        },
-        module: {
-            //jshint
-            preLoaders: [
-                //jshint
-                {
-                    test: /\.js$/, // include .js files
-                    exclude: /node_modules/, // exclude any and all files in the node_modules folder
-                    loader: "jshint-loader"
-                }
-            ],
-            loaders: [
-                {test: /\.css$/, loader: ExtractTextPlugin.extract("style-loader", "css-loader")},
-                {test: /\.hbs$/, loader: "handlebars-loader"},
-                {test: /\.json$/, loader: "json-loader"},
-                {test: /\.(jpg|png)$/, loader: 'url?limit=30000&name=img/[name].[hash].[ext]'}, //inline images with size less than 30kb
-            ],
-        },
+function isTest(valid, invalid) {
 
-        plugins: plugins.concat([
-            // define global scoped variable, force JSON.stringify()
-            new webpack.DefinePlugin({
-                __DEVELOPMENT__: !production,
-                VERSION: JSON.stringify(packageJson.version),
-                LANG: JSON.stringify(lang)
-            }),
-        ]),
+    return isEnvironment('develop') ? valid : invalid;
+}
 
-        // more options in the optional jshint object
-        jshint: {
-            // any jshint option http://www.jshint.com/docs/options/
-            // i. e.
-            camelcase: true,
+function isDemo(valid, invalid) {
 
-            // jshint errors are displayed by default as warnings
-            // set emitErrors to true to display them as errors
-            emitErrors: false,
+    return isEnvironment('demo') ? valid : invalid;
+}
 
-            // jshint to not interrupt the compilation
-            // if you want any file with jshint errors to fail
-            // set failOnHint to true
-            failOnHint: false,
+function isEnvironment(env) {
+    return getEnvironment() === env;
+}
 
-            // custom reporter function
-            reporter: function (errors) {
-            }
-        }
-    };
-});
+function getEnvironment() {
+    return process.env.NODE_ENV;
+}

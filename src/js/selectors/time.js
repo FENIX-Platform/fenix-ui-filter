@@ -1,18 +1,16 @@
-/*global define, Promise, amplify */
-
 define([
     "jquery",
     "loglevel",
     'underscore',
-    'fx-filter/config/errors',
-    'fx-filter/config/events',
-    'fx-filter/config/config',
-    'i18n!fx-filter/nls/filter',
-    'handlebars',
-    'text!fx-filter/html/selectors/time.hbs',
-    "bootstrap.datetimepicker",
-    "amplify"
-], function ($, log, _, ERR, EVT, C, i18n, Handlebars, template) {
+    'moment',
+    '../../config/errors',
+    '../../config/events',
+    '../../config/config',
+    '../../nls/labels',
+    '../../html/selectors/time.hbs',
+    'eonasdan-bootstrap-datetimepicker'
+
+], function ($, log, _, Moment,  ERR, EVT, C, i18n, template ) {
 
     'use strict';
 
@@ -43,7 +41,8 @@ define([
 
             self.status.ready = true;
 
-            amplify.publish(self._getEventName(EVT.SELECTOR_READY), self);
+            self._trigger(EVT.SELECTOR_READY, {id: self.id});
+
         }, 0);
 
         return this;
@@ -55,16 +54,20 @@ define([
      */
     Time.prototype.getValues = function () {
 
-        var date = this.$pickerEl.data('date'),
-        //date = new Date(this.$pickerEl.data('date')).getTime(),
+        var momentdate = this.$pickerEl.data("DateTimePicker").date(),
+            //date = this.$pickerEl.data('date'),
+            //date = new Date(this.$pickerEl.data('date')).getTime(),
             result = {
                 values: [],
                 labels: {}
             };
 
+        if (momentdate != null && momentdate.isValid()) momentdate = momentdate.unix()*1000;
+
         //add always from
-        result.values.push(date);
-        result.labels[date] = "Date";
+        result.values.push(momentdate);
+        result.labels[momentdate] = "Date";
+
 
         return result;
     };
@@ -162,7 +165,12 @@ define([
 
         this.silentMode = silent;
 
-        this.$pickerEl.data("DateTimePicker").date(new Date(v));
+        var d = new Date(v).getTime();
+        d = (isNaN(v)) ?  Moment(d).unix() : Moment(v,'x').unix();
+
+        log.info("Moment Object: ", Moment(d,'X'));
+
+        this.$pickerEl.data("DateTimePicker").date(Moment(d,'X'));
     };
 
     Time.prototype._checkConfiguration = function () {
@@ -181,8 +189,7 @@ define([
         if ($el.length === 0) {
 
             log.info("Injecting template for: " + this.id);
-            var tmpl = Handlebars.compile($(template).find(s.PICKER_CONTAINER)[0].outerHTML);
-            this.$el.append(tmpl($.extend(true, {}, i18n, this, this.selector)));
+            this.$el.append(template($.extend(true, {}, i18n[this.lang], this, this.selector)));
         }
 
     };
@@ -195,13 +202,15 @@ define([
 
         this.values = [];
 
+        this.channels = {};
+
         this.$pickerEl = this.$el.find(s.PICKER_CONTAINER);
 
     };
 
     Time.prototype._renderSelector = function () {
 
-        this.$el.find(s.PICKER_CONTAINER).datetimepicker(
+        this.$pickerEl.datetimepicker(
             $.extend(true, {
                 icons: {
                     time: "icojam_time time-selector-icon",
@@ -209,6 +218,7 @@ define([
                     up: "icojam_arrow_up time-selector-icon",
                     down: "icojam_arrow_down time-selector-icon"
                 }
+                ,locale: this.lang.toLowerCase()
             }, /*here*/ this.selector.config) //add calculated properties
         );
 
@@ -237,7 +247,8 @@ define([
 
                 //workaround for silent change
                 if (this.silentMode !== true) {
-                    amplify.publish(self._getEventName(EVT.SELECTORS_ITEM_SELECT));
+                    this._trigger(EVT.SELECTOR_SELECTED, $.extend({id: self.id }, self.getValues()) )
+
                 }
                 delete this.silentMode;
 
@@ -255,13 +266,45 @@ define([
 
         this._unbindEventListeners();
 
-        this.$pickerEl.data("DateTimePicker").destroy();
+        if (this.$pickerEl.data("DateTimePicker") && typeof this.$pickerEl.data("DateTimePicker").destroy === "function") {
+            this.$pickerEl.data("DateTimePicker").destroy();
+        }
+
+        this.$el.empty();
+
     };
 
     // dependency handler
 
     Time.prototype._dep_ensure_unset = function (opts) {
         log.warn("_dep_ensure_unset method not implemented for time selector");
+    };
+
+    /**
+     * pub/sub
+     * @return {Object} component instance
+     */
+    Time.prototype.on = function (channel, fn, context) {
+        var _context = context || this;
+        if (!this.channels[channel]) {
+            this.channels[channel] = [];
+        }
+        this.channels[channel].push({context: _context, callback: fn});
+        return this;
+    };
+
+    Time.prototype._trigger = function (channel) {
+
+        if (!this.channels[channel]) {
+            return false;
+        }
+        var args = Array.prototype.slice.call(arguments, 1);
+        for (var i = 0, l = this.channels[channel].length; i < l; i++) {
+            var subscription = this.channels[channel][i];
+            subscription.callback.apply(subscription.context, args);
+        }
+
+        return this;
     };
 
     return Time;

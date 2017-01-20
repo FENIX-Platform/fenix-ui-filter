@@ -1,0 +1,24 @@
+{{#if nls}}
+
+    {{#if internalNls}}
+        <div data-selector="{{../selector}}_{{lang}}"></div>
+
+    {{else}}
+        <ul class="nav nav-tabs">
+            {{#each languages}}
+                <li><a data-lang="{{this}}" data-toggle="tab"
+                       href="#nls-{{../id}}-{{../selector}}-{{this}}">{{this}}</a></li>
+            {{/each}}
+        </ul>
+        <div class="tab-content">
+            {{#each languages}}
+                <div id="nls-{{../id}}-{{../selector}}-{{this}}" class="tab-pane">
+                    <div data-selector="{{../selector}}_{{this}}"></div>
+                </div>
+            {{/each}}
+        </div>
+    {{/if}}
+
+{{else}}
+    <div data-selector="{{../selector}}_{{lang}}"></div>
+{{/if}}

@@ -1,16 +1,23 @@
 # FENIX Filter
 
 ```javascript
-var Filter = require('fx-filter/start');
+var Filter = require('fenix-ui-filter');
 
 var filter = new Filter({
         el : "#filter",
-        items : {
+        selectors : {
             sel_1 : { /* selector configuration goes here */ }, 
             sel_2 : { ... }
         }
     });
 ```
+
+# Commands
+
++ `npm run build` : builds in production mode
++ `npm run build:demo` : called after `npm run build`, builds the `demo` folder
++ `npm run dev` : launch `webpack-dev-server` for develop. Once server is started, its default url is `http://localhost:8080/webpack-dev-server/`
++ `npm t` : automated test
 
 # Configuration
 
@@ -29,17 +36,17 @@ Check `fx-filter/config/config.js` to have a look of the default configuration.
    <tbody>
       <tr>
          <td>el</td>
-         <td>CSS3 Selector/JavaScript DOM element/jQuery DOM element</td>
+         <td>CSS3 Item/JavaScript DOM element/jQuery DOM element</td>
          <td> - </td>
          <td>"#container"</td>
          <td>component container</td>
       </tr>
       <tr>
-         <td>items</td>
+         <td>selectors</td>
          <td>Object</td>
          <td> - </td>
          <td> - </td>
-         <td>The filter instance's selectors to render. Check the Selector configuration. </td>
+         <td>The filter instance's selectors to render. Check the Item configuration. </td>
       </tr>
       <tr> 
          <td>template</td>
@@ -51,46 +58,26 @@ Check `fx-filter/config/config.js` to have a look of the default configuration.
       <tr>
          <td>pluginRegistry</td>
          <td>object</td>
-         <td>{
-            'dropdown': {
-            path: selectorPath + 'dropdown'
-            },
-            'tree': {
-            path: selectorPath + 'tree'
-            },
-            'input': {
-            path: selectorPath + 'input'
-            },
-            'range': {
-            path: selectorPath + 'range'
-            },
-            'time': {
-            path: selectorPath + 'time'
-            },
-            'sortable': {
-            path: selectorPath + 'sortable'
-            }
-            }
-         </td>
+         <td>{ }</td>
          <td>-</td>
          <td>Keyset: plugins' ids. Value: object. path: plugin module path</td>
       </tr>
       <tr>
-         <td>focusedSelectorClassName</td>
+         <td>focusedItemClassName</td>
          <td>string</td>
          <td>"focused"</td>
          <td>"my-focused"</td>
          <td>CSS class applied to make a selector focused</td>
       </tr>
       <tr>
-         <td>mandatorySelectorClassName</td>
+         <td>mandatoryItemClassName</td>
          <td>string</td>
          <td>"mandatory"</td>
          <td>"my-mandatory"</td>
          <td>CSS class applied to make a selector mandatory</td>
       </tr>
       <tr>
-         <td>disabledSelectorClassName</td>
+         <td>disabledItemClassName</td>
          <td>string</td>
          <td>"disabled"</td>
          <td>"my-disabled"'</td>
@@ -119,7 +106,7 @@ Check `fx-filter/config/config.js` to have a look of the default configuration.
       </tr>
       <tr>
          <td>summaryEl</td>
-         <td>CSS3 Selector/JavaScript DOM element/jQuery DOM element</td>
+         <td>CSS3 Item/JavaScript DOM element/jQuery DOM element</td>
          <td>-</td>
          <td>"#summary-container"</td>
          <td>Container of the summary</td>
@@ -136,10 +123,15 @@ Check `fx-filter/config/config.js` to have a look of the default configuration.
          <td>Object</td>
          <td> - </td>
          <td>{
-            indicator : ["cod_001"],
-            year : [{value: "2000", parent: "from"}, {value: "2016", parent: "to"}]}
+                values : { 
+                            indicator : ["cod_001"],
+                            year : [{value: "2000", parent: "from"}, {value: "2016", parent: "to"}]}
+                         },
+                labels: {
+                         ...
+                         }
          </td>
-         <td>Custom renderer for summary</td>
+         <td>Initial filter values, use plain format</td>
       </tr>
       <tr>
          <td>cache</td>
@@ -179,7 +171,7 @@ Check `fx-filter/config/config.js` to have a look of the default configuration.
    </tbody>
 </table>
 
-# Selector configuration
+# Item configuration
 
 This is the schema of a selector configuration
 
@@ -187,11 +179,13 @@ This is the schema of a selector configuration
 {
  sel_1 : { // this will appear within the result of .getValues()
  
-    className : "...", //custom CSS class for selector container
+    classNames : "...", //custom CSS class for selector container
      
     selector : {}, // configuration of the selector
     
-    selectors : {}, // in case of semantic selector 
+    selectors : {}, // in case of group selector 
+    
+    semantic : boolean, // in case of semantic group selector
     
     cl : {}, // specifies the code-list to use as selector source
      
@@ -209,7 +203,7 @@ This is the schema of a selector configuration
 }
 ```
 
-## Selector 
+## Item 
 
 ```javascript
 {
@@ -220,7 +214,7 @@ selector : {
  
     type : "...", // additional selector configuration. Ex: id:"input", type:"text"
  
-    source : [ {value: "item", label: "Item"} ], // static selector source. Merged to `cl` configuration
+    source : [ {value: "selector", label: "Item"} ], // static selector source. Merged to `cl` configuration
  
     default : [...], // default selector values
  
@@ -272,13 +266,17 @@ This configuration proxies the information to D3S code-list / enumeration servic
     
         hideSwitch: true, // hide selector enable/disable switcher
         
-        hideTitle : true, // Hide Title
+        hideTitle : true, // Hide Title,
+        
+        hideDescription : true, // Hide description,
         
         hideHeader : true, // Hide Header,
         
         hideRemoveButton : false, // Hide remove button
         
-        title : "..." // selector title
+        title : "..." // selector title,
+        
+        description : "..." // selector title,
 
     }
 ...
@@ -318,8 +316,11 @@ NB: not all dependencies are compatible with all the available selectors. Check 
 
 NB: these are different events from filter global events 
 
-- `select` : triggered when an selector's item  is selected
+- `select` : triggered when an selector's selector  is selected
 - `disable` :  triggered when an selector is disabled
+- `change` :  triggered when an selector change its state
+- `ready` :  triggered each selector is rendered
+- `remove` :  triggered each selector is removed
 
 ## Compatibility tables
 
@@ -361,7 +362,7 @@ TODO
 # Available selectors
 
 The following are the default available selectors. The plugin registry can be extended with the `pluginRegistry` configuration.
-In order to choose a specific selector specify the correspondent id in `selector.id` configuratino for each item.
+In order to choose a specific selector specify the correspondent id in `selector.id` configuratino for each selector.
 ## Dropdown
 
 Wrapped lib: [selectize.js](http://selectize.github.io/selectize.js/)
@@ -376,9 +377,9 @@ selector : {
     hideClearAllButton : true, //Hide clear all button
     ...
     config : {
-        maxItems: 1, // Max amount of selected items,
+        maxItems: 1, // Max amount of selected selectors,
         placeholder: "Please select",
-        plugins: ['remove_button'], //in combination with mode:'multi' create a 'X' button to remove items
+        plugins: ['remove_button'], //in combination with mode:'multi' create a 'X' button to remove selectors
         mode: 'multi'
     }
 }
@@ -394,6 +395,22 @@ Wrapped lib: native HTML elements
 selector : {
     ...
     type : "...", // to specify the input type. Every HTML input type is allowed
+}
+...
+```
+
+## Textarea
+Wrapped lib: native HTML elements
+
+```javascript
+//specific configuration
+...
+selector : {
+    ...
+    config : {
+        row: 100,
+        cols: 150
+    }
 }
 ...
 ```
@@ -425,10 +442,10 @@ Wrapped lib: [sortable.js](http://rubaxa.github.io/Sortable/)
 selector : {
     ...
     config : {
-        groups: { // Configure groups: in case source item has parent config [{value: ".", label: "X", parent: "group1"}]
+        groups: { // Configure groups: in case source selector has parent config [{value: ".", label: "X", parent: "group1"}]
             group1: 'Group 1', // group id and title
             },
-        itemRender : function ( model ) { }; //custom item render function
+        selectorRender : function ( model ) { }; //custom selector render function
         }
     }
 ...
@@ -445,8 +462,8 @@ Wrapped lib: [jstree](https://www.jstree.com/)
 ...
 selector : {
     ...
-    max : 2, //max number of selectable items
-    lazy : true, //lazy loading of children items
+    max : 2, //max number of selectable selectors
+    lazy : true, //lazy loading of children selectors
     hideFilter : true, //hide filter
     hideButtons : true, //hide all buttons,
     hideSelectAllButton: true, //Hide select all button
@@ -455,19 +472,26 @@ selector : {
     hideSummary : true, //Hide selection summary,
     ...
     },
-summaryRender : function ( item ) {} // custom summary render function
+summaryRender : function ( selector ) {} // custom summary render function
 ...
 ```
 
-# Semantic
+# Groups
 
-It is possible to define a semantic selector. A semantic selector is a group of selectors in which only one
+It is possible to define a group selector. There are two kind of group selectors:
+- standard group selector 
+- semantic group selector 
+
+A standard group selector is a group of selectors in each selector is active at the same time. It is a selector that contains many selectors. 
+This is useful, for example, when a specific information can be described with different attributes (e.g. contact information contains name, surname, role, etc.).
+
+A semantic group selectors is a group of selectors in which only one
  can be active. This is useful, for example, when a specific information can be selected in different manners (e.g. time selection, 
  with a calendar or a range).
  
 # Filter layout definition
 It is possible to specify where a selector has to be rendered.
-FENIX Filter looks for `data-selector=":id"` or `data-semantic=":id"` where `:id` is the selector/semantic id within its `el`.
+FENIX Filter looks for `data-selector=":id"` or `data-group=":id"` where `:id` is the selector/group id within its `el`.
 In case no container will be found, FENIX filter will add (append/prepend according to configuration) the container to its `el`.
 
 It is possible to pass an HTML template using the `template` configuration that will be attached to the `el`.
@@ -483,7 +507,7 @@ Browse the `demo` folder to visualize a showcase of the available selectors and 
 filter.getValues("fenix");
 ```
 
-- `filter.getValues(format, includedSelectors)` : get filter values according to the specific format. Available format are 'plain' (default and optional), includedSelectors filter the selectors to include in the result
+- `filter.getValues(format, includedItems)` : get filter values according to the specific format. Available format are 'plain' (default and optional), includedItems filter the selectors to include in the result
 catalog, fenix. For more info che the `fx-common/utils` doc.
 - `filter.setValues(values)` : set filter values. The syntax is the same of `filter.getValues()` 
 - `filter.on(event, callback[, context])` : pub/sub 
@@ -499,7 +523,7 @@ catalog, fenix. For more info che the `fx-common/utils` doc.
 
 - `remove` : triggered when a selector is removed
 - `ready` : triggered when the filter and all its initial selectors are rendered
-- `change` : triggered when a selector state changes (selector item selected, selector disabled, ecc...)
+- `change` : triggered when a selector state changes (selector selector selected, selector disabled, ecc...)
 
 # Output formats
 

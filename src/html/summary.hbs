@@ -1,0 +1,14 @@
+<div data-summary>
+
+    {{#summary}}
+        <ul class="list-unstyled">
+            {{label}}
+
+            {{#values}}
+                <li data-code="{{this.code}}" data-selector="{{this.selector}}">{{{ this.value }}}</li>
+            {{/values}}
+
+        </ul>
+    {{/summary}}
+
+</div>

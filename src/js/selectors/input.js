@@ -1,16 +1,13 @@
-/*global define, Promise, amplify */
-
 define([
     "jquery",
     "loglevel",
     'underscore',
-    'text!fx-filter/html/selectors/input.hbs',
-    'fx-filter/config/errors',
-    'fx-filter/config/events',
-    'fx-filter/config/config',
-    'handlebars',
-    "amplify"
-], function ($, log, _, templates, ERR, EVT, C, Handlebars) {
+    '../../html/selectors/inputList.hbs',
+    '../../html/selectors/inputItem.hbs',
+    '../../config/errors',
+    '../../config/events',
+    '../../config/config'
+], function ($, log, _, templateList, templateItem, ERR, EVT, C) {
 
     'use strict';
 
@@ -27,7 +24,7 @@ define([
 
         var self = this;
 
-        $.extend(true, this, defaultOptions, o, {$el : $(o.el)});
+        $.extend(true, this, defaultOptions, o, {$el: $(o.el)});
 
         this._checkConfiguration();
 
@@ -46,7 +43,8 @@ define([
 
             self.status.ready = true;
 
-            amplify.publish(self._getEventName(EVT.SELECTOR_READY), self);
+            self._trigger(EVT.SELECTOR_READY, {id: self.id});
+
         }, 0);
 
         return this;
@@ -73,7 +71,7 @@ define([
             var val = $(element).val();
 
             result.values.push(val);
-            result.labels[val] = $(element).siblings("label").text()
+            result.labels[val] = $(element).siblings("label").text() || val;
 
         });
 
@@ -116,6 +114,30 @@ define([
         this.status.disabled = false;
 
         log.info("Selector enabled : " + this.id);
+
+    };
+
+    /**
+     * Enable selector
+     * Mandatory method
+     */
+    Input.prototype.enableReadOnly = function () {
+
+        this.$inputs.attr('readonly', true);
+
+        log.info("Selector read only enabled : " + this.id);
+
+    };
+
+    /**
+     * Enable selector
+     * Mandatory method
+     */
+    Input.prototype.disableReadOnly = function () {
+
+        this.$inputs.attr('readonly', false);
+
+        log.info("Selector read only disabled : " + this.id);
 
     };
 
@@ -173,10 +195,14 @@ define([
     Input.prototype.setValue = function (v, silent) {
         log.info("Set input value: " + v);
 
-        var $input;
+        var self = this,
+            $input = $();
 
-        if(this.type === 'checkbox' || this.type === 'radio') {
-            $input = this.$inputs.filter("[value='" + v + "']").prop('checked', true);
+        if (this.type === 'checkbox' || this.type === 'radio') {
+            self.$inputs.prop('checked', false);
+            _.each(v, function (x) {
+                $input = self.$inputs.filter("[value='" + x + "']").prop('checked', true);
+            })
         } else {
             $input = this.$inputs.val(v);
         }
@@ -190,9 +216,9 @@ define([
     Input.prototype._checkConfiguration = function () {
 
         if (!this.selector.type) {
-            log.trace("Set input type to 'radio'");
+            log.trace("Set input type to 'text'");
 
-            this.type = "radio";
+            this.type = "text";
 
         } else {
             this.type = this.selector.type;
@@ -222,6 +248,8 @@ define([
 
         this.values = [];
 
+        this.channels = {};
+
         this.$inputs.each(function () {
             self.values.push($(this).attr("value"));
         });
@@ -229,25 +257,30 @@ define([
     };
 
     Input.prototype._renderInput = function () {
-
         this._createInputs();
     };
 
     Input.prototype._createInputs = function () {
 
-        var data = this.selector.source || [],
+        var self = this,
+            data = this.selector.source || [],
             config = this.selector.config || {},
             $list = this.$el.find(s.TEMPLATE_LIST),
-            item = $(templates).find(s.TEMPLATE_ITEM)[0].outerHTML,
             list;
+
+        // add source from codelist/enumeration
+        var d = this.data ? this.data.map(function (i) {
+            return {
+                value: i.code,
+                label: i.title[self.lang] || i.title["EN"]
+            }
+        }) : [];
+
+        data = d.concat(data);
 
         if ($list.length === 0) {
             log.info("Injecting input list");
-            var ulContainers =  $(templates).find(s.TEMPLATE_LIST_CONTAINER)[0].outerHTML,
-                tmpl = Handlebars.compile(ulContainers),
-                $list = $(tmpl({
-                    isCheckboxOrRadio: (this.type === 'radio' || this.type === 'checkbox')
-                }));
+            var $list = $(templateList({isCheckboxOrRadio: (this.type === 'radio' || this.type === 'checkbox')}));
 
             this.$el.append($list);
 
@@ -262,14 +295,14 @@ define([
 
             window.fx_filter_input_id >= 0 ? window.fx_filter_input_id++ : window.fx_filter_input_id = 0;
 
-            var tmpl = Handlebars.compile(item),
-                m = $.extend(true, model, config, {
+            var m = $.extend(true, model, config, {
                     name: this.id + window.fx_filter_input_id,
                     id: "fx_input_" + window.fx_filter_input_id,
+                    label: model.label || this.template.title,
                     type: this.type,
                     isCheckboxOrRadio: (this.type === 'radio' || this.type === 'checkbox')
                 }),
-                $input = $(tmpl(m));
+                $input = $(templateItem(m));
 
             initValidation($input, config);
 
@@ -299,11 +332,8 @@ define([
                         $(this).find('input').val(config.max)
                     }
                 });
-
             }
-
         }
-
     };
 
     Input.prototype._printDefaultSelection = function () {
@@ -335,19 +365,21 @@ define([
 
                 var r = self.getValues(),
                     value = r.values[0] || "",
-                    label = r.labels[value];
+                    labels = {},
+                    payload;
 
-                amplify.publish(self._getEventName(EVT.SELECTORS_ITEM_SELECT + self.id), {
-                    value: value,
-                    label: label,
+                labels[value] = r.labels[value];
+
+                payload = {
+                    id: self.id,
+                    values: [value],
+                    label: labels,
                     parent: null
-                });
+                };
 
-                amplify.publish(self._getEventName(EVT.SELECTORS_ITEM_SELECT));
+                self._trigger(EVT.SELECTOR_SELECTED, payload)
             }
-
         });
-
     };
 
     Input.prototype._unbindEventListeners = function () {
@@ -359,6 +391,8 @@ define([
         this._unbindEventListeners();
 
         this._destroyInput();
+
+        this.$el.empty();
 
     };
 
@@ -387,6 +421,33 @@ define([
             }
 
         }
+    };
+
+    /**
+     * pub/sub
+     * @return {Object} component instance
+     */
+    Input.prototype.on = function (channel, fn, context) {
+        var _context = context || this;
+        if (!this.channels[channel]) {
+            this.channels[channel] = [];
+        }
+        this.channels[channel].push({context: _context, callback: fn});
+        return this;
+    };
+
+    Input.prototype._trigger = function (channel) {
+
+        if (!this.channels[channel]) {
+            return false;
+        }
+        var args = Array.prototype.slice.call(arguments, 1);
+        for (var i = 0, l = this.channels[channel].length; i < l; i++) {
+            var subscription = this.channels[channel][i];
+            subscription.callback.apply(subscription.context, args);
+        }
+
+        return this;
     };
 
     return Input;
