@@ -1,6 +1,6 @@
 {
   "name": "fenix-ui-filter",
-  "version": "3.0.0-beta.77",
+  "version": "3.0.0-beta.79",
   "description": "FENIX Filter",
   "main": "dist/fenix-ui-filter.min.js",
   "scripts": {
