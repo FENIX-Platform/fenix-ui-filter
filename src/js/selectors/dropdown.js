@@ -21,7 +21,8 @@ define([
                     text: "All",
                     value: "all"
                 },
-                sort: true
+                sort: true,
+                noElement: true
             }
         },
         s = {
@@ -418,6 +419,18 @@ define([
             }
 
         });
+
+        //If the dropdown can not be without items
+        //the last element will not be canceled
+        if (!this.selector.noElement) {
+            selectize.on('item_remove', function (item, elem) {
+
+                var value = selectize.getValue();
+                if((!value)&&(value.length==0)){
+                    selectize.addItem(item);
+                }
+            });
+        }
 
         /* In conflict, with ON CHANGE EVENT
          this.$el.find('.selectize-control').on('click', function () {
