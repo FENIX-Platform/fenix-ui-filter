@@ -206,7 +206,7 @@ define([
         var instance = this.dropdown[0].selectize;
 
         _.each(v, function (i) {
-            console.log(i)
+            //console.log(i)
             instance.addOption({value: i, text: i}, silent);
         });
 

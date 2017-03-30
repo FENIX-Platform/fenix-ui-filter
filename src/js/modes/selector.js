@@ -808,7 +808,7 @@ define([
 
             return Q.Promise(function (resolve) {
 
-                console.log(stored)
+                //console.log(stored)
                 resolve(stored);
             });
         }
