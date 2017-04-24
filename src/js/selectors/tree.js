@@ -188,7 +188,8 @@ define([
         source = _.map(source, function (d) {
             return {
                 id: d.value || d.id,
-                text: d.label || d.text
+                text: d.label || d.text,
+                parent : d.parent || '#'
             }
         });
 
