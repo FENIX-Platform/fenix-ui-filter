@@ -92,13 +92,13 @@ define([
 
         //this._createConfiguration();
 
-        this._renderModel2();
+        //this._renderModel2();
 
         //this._renderAmis();
 
         //this._renderDependencies();
 
-        //this._renderAll();
+        this._renderAll();
 
         return;
 
@@ -163,13 +163,13 @@ define([
             console.log("Ready");
         }).on("select", function (values) {
             console.log("Select event")
-            console.log(values)
+            //console.log(values)
         }).on("change", function (values) {
             console.log("Change event")
-            console.log(values)
+            //console.log(values)
         }).on("remove", function (values) {
             console.log("remove event")
-            console.log(values)
+            //console.log(values)
         });
 
 

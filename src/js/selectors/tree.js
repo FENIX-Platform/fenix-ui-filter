@@ -14,8 +14,8 @@ define([
     'use strict';
 
     var defaultOptions = {
-        summaryRender: function (params) {
-            return this._summaryRender(params);
+        summaryRender: function (params, opts) {
+            return this._summaryRender(params, opts);
         }
     }, s = {
         SELECTORS_CLASS: ".fx-selector",
@@ -556,11 +556,12 @@ define([
 
         var values = this.getValues(),
             model = [],
+            opts = { labelonly : this.template.hideSummaryCode || false },
             self = this,
             instance = this.tree.jstree(true);
 
         _.each(values.labels, function (val, key) {
-            var $summaryModel = $(self.summaryRender({value: key, label: val})),
+            var $summaryModel = $(self.summaryRender({value: key, label: val}, opts)),
                 value;
 
             if ($summaryModel.length > 0) {
@@ -570,14 +571,14 @@ define([
             model.push(value);
         });
         //unbind click listener
-        this.$summaryItems.each(function () {
+        this.$summaryItems.children().each(function () {
             $(this).off();
         });
 
         this.$summaryItems = $(templateItem({values: model}));
 
         //bind click listener
-        this.$summaryItems.each(function () {
+        this.$summaryItems.children().each(function () {
             var $this = $(this);
             $this.on("click", function () {
                 if (self.status.disabled !== true) {
@@ -591,9 +592,14 @@ define([
 
     };
 
-    Tree.prototype._summaryRender = function (item) {
+    Tree.prototype._summaryRender = function (item, opts) {
 
-        return "<span>" + item.label + "<span class='code-brk'>[" + item.value + "]</span></span>";
+        var output = (opts.labelonly ?
+            "<span>" + item.label + "</span>" :
+            "<span>" + item.label + "<span class='code-brk'>[" + item.value + "]</span></span>");
+        return output;
+
+        //return "<span>" + item.label + "<span class='code-brk'>[" + item.value + "]</span></span>";
 
     };
 

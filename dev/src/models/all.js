@@ -93,14 +93,16 @@ define([
                     default: ["item_1"],
                 },
 
+
                 summaryRender: function (item) {
-                    return "<u><mark> " + item.label + "</mark></u>"
+                    return "<code><u><mark> : " + item.label + "</mark></u></code>"
                 },
 
                 template: {
                     title: "Tree",
                     hideSwitch: false,
-                    hideRemoveButton: false
+                    hideRemoveButton: false,
+                    hideSummaryCode : true
                 }
             },
 

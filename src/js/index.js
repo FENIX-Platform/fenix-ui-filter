@@ -455,6 +455,8 @@ define([
                     el: this.$el,
                     cache: this.cache,
                     environment: this.environment
+                    //summaryRender: obj.summaryRender < Still need fixing.
+
                 });
 
                 var instance = new Mode(model);
