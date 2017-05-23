@@ -577,12 +577,14 @@ define([
 
         this.$summaryItems = $(templateItem({values: model}));
 
+        var that = this.$summaryItems;
+
         //bind click listener
         this.$summaryItems.children().each(function () {
             var $this = $(this);
             $this.on("click", function () {
                 if (self.status.disabled !== true) {
-                    instance.deselect_node($this.find("[data-value]").data("value"));
+                    instance.deselect_node($this.data("value"));
                     $this.remove();
                 }
             });
