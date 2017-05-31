@@ -84,15 +84,25 @@ define([
 
                 selector: {
                     id: "tree",
+                    /*
                     source: [
                         {value: "item_1", label: "Item 1"},
                         {value: "item_11", label: "Item 11", parent: "item_1"},
                         {value: "item_2", label: "Item 2"},
                         {value: "item_22", label: "Item 22", parent: "item_2"},
+                        {value: "item_3", label: "Item 3"},
+                        {value: "item_3", label: "Item 3"},
                     ],
                     default: ["item_1"],
+                    */
                 },
 
+                cl: {
+                    uid: "crs_dac",
+                    version: "2016",
+                    levels: 2,
+                    codes: ["311", "9999"]
+                },
 
                 summaryRender: function (item) {
                     return "<code><u><mark> : " + item.label + "</mark></u></code>"
@@ -101,8 +111,7 @@ define([
                 template: {
                     title: "Tree",
                     hideSwitch: false,
-                    hideRemoveButton: false,
-                    hideSummaryCode : true
+                    hideRemoveButton: false
                 }
             },
 

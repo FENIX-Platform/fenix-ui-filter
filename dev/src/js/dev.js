@@ -6,6 +6,7 @@ define([
     'fenix-ui-filter-utils',
     'dev/src/models/model-1',
     'dev/src/models/all',
+    'dev/src/models/adam',
     'dev/src/models/semantic',
     'dev/src/models/fx-resource',
     'dev/src/models/to-sync',
@@ -26,7 +27,7 @@ define([
     'dev/src/nls/labels',
     'handlebars',
     'bootstrap'
-], function (log, $, _, Filter, Utils, Model1, AllModel, SemanticModel, FxResource, ModelToSync, TableTabModel, Process, AggregationModel, Model2, ModelDependencies, CountryStatModel, SetSourcesModel, AmisModel, TimeModel, UnecaModel, Countrystat1model, Countrystat2model, Countrystat3model, model1baseTemplate, i18nLabels, Handlebars) {
+], function (log, $, _, Filter, Utils, Model1, AllModel, AdamModel, SemanticModel, FxResource, ModelToSync, TableTabModel, Process, AggregationModel, Model2, ModelDependencies, CountryStatModel, SetSourcesModel, AmisModel, TimeModel, UnecaModel, Countrystat1model, Countrystat2model, Countrystat3model, model1baseTemplate, i18nLabels, Handlebars) {
 
 
     'use strict';
@@ -65,7 +66,7 @@ define([
         error_model = {},
         valid_model = {},
         filters = [],
-        environment = 'production'; //'production';
+        environment = 'demo'; //'production';
 
     function Dev() {
 
@@ -98,7 +99,9 @@ define([
 
         //this._renderDependencies();
 
-        this._renderAll();
+        //this._renderAll();
+
+        this._renderAdam();
 
         return;
 
@@ -130,6 +133,14 @@ define([
 
         var filter = this.createFilter({
             selectors: AllModel,
+            el: s.AMIS
+        });
+    };
+
+    Dev.prototype._renderAdam = function () {
+
+        var filter = this.createFilter({
+            selectors: AdamModel,
             el: s.AMIS
         });
     };

@@ -297,6 +297,7 @@ define([
                 data = _.uniq(_.union(data, convertedData), false, function (item) {
                     return item.id;
                 });
+
             }
         }
 
@@ -336,7 +337,11 @@ define([
 
 
                 if (Array.isArray(item.children) && item.children.length > 0) {
-                    data = _.union(data, this._buildTreeModelFromCodelist(item.children, item.code, cl));
+
+                    data = _.uniq(_.union(data, this._buildTreeModelFromCodelist(item.children, item.code, cl)), false, function (item) {
+                        return item.id;
+                    });
+
                 }
 
             } else {
@@ -345,6 +350,10 @@ define([
             }
 
         }, this));
+
+        data = _.uniq(data, false, function(item){
+            return item['id'];
+        });
 
         return data;
     };
@@ -610,6 +619,7 @@ define([
         log.info(opts);
 
         var data = opts.data,
+            self = this,
             model = [],
             $container = this.$el,
             tree;
@@ -621,14 +631,11 @@ define([
 
         model = _.unique(model);
 
+
         if ($container.length > 0 && Array.isArray(model)) {
-
             tree = $container.find(s.TREE_CONTAINER).jstree(true);
-
             var treeData = this._buildTreeModel(model, null);
-
             this.setSource(treeData);
-
         } else {
             log.warn("Impossible to find container for: " + this.id);
         }
