@@ -186,7 +186,6 @@ define([
      * Mandatory method
      */
     Textarea.prototype.deselectAll = function (id) {
-        console.log("in deselectAll text area")
         //TO DO
     };
 

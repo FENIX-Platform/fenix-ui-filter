@@ -149,7 +149,6 @@ define([
      * Mandatory method
      */
     Range.prototype.deselectAll = function (id) {
-        console.log("in deselectAll range")
         //TO DO
     };
 

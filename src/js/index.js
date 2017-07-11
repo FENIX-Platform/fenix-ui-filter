@@ -776,13 +776,8 @@ define([
     };
 
     Filter.prototype._deselectAll = function (o) {
-
-        console.log("in _deselectAll")
-        console.log(this._getSelectorInstance(o))
         if (this._getSelectorInstance(o)) {
-            console.log("Before call")
             this._callSelectorInstanceMethod(o, "deselectAll", o);
-            //this._callSelectorInstanceMethod(o, "setSource", o);
         } else {
             log.info(key + " skipped");
         }

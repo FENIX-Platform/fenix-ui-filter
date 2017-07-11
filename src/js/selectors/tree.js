@@ -204,7 +204,6 @@ define([
      * Mandatory method
      */
     Tree.prototype.deselectAll = function (id) {
-        console.log("in deselectAll tree")
         var $container = this.$el,
                      self = this;
         $container.find(s.TREE_CONTAINER).jstree("deselect_all", true);

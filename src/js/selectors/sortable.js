@@ -159,7 +159,6 @@ define([
      * Mandatory method
      */
     Sortable.prototype.deselectAll = function (id) {
-        console.log("in deselectAll sortable")
         //TO DO
     };
 

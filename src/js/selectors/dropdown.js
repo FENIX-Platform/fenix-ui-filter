@@ -106,7 +106,6 @@ define([
      * Mandatory method
      */
     Dropdown.prototype.deselectAll = function (id) {
-        console.log("in deselectAll dropdown")
         //TO DO
     };
 

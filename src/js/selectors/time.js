@@ -178,7 +178,6 @@ define([
      * Mandatory method
      */
     Time.prototype.deselectAll = function (id) {
-        console.log("in deselectAll time")
         //TO DO
     };
 
