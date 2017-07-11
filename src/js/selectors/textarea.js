@@ -181,6 +181,15 @@ define([
 
     };
 
+    /**
+     * deselectAll method
+     * Mandatory method
+     */
+    Textarea.prototype.deselectAll = function (id) {
+        console.log("in deselectAll text area")
+        //TO DO
+    };
+
     Textarea.prototype._getStatus = function () {
 
         return this.status;

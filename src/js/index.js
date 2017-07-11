@@ -116,6 +116,17 @@ define([
     };
 
     /**
+     * Deselect selectors selection
+     * @return {null}
+     */
+    Filter.prototype.deselectAll = function (o) {
+
+        log.info("Deselect all the selection");
+
+        return this._deselectAll(o);
+    };
+
+    /**
      * unset selectors sources
      * @return {null}
      */
@@ -762,6 +773,21 @@ define([
         }, this));
 
         log.info("Selectors sources set");
+    };
+
+    Filter.prototype._deselectAll = function (o) {
+
+        console.log("in _deselectAll")
+        console.log(this._getSelectorInstance(o))
+        if (this._getSelectorInstance(o)) {
+            console.log("Before call")
+            this._callSelectorInstanceMethod(o, "deselectAll", o);
+            //this._callSelectorInstanceMethod(o, "setSource", o);
+        } else {
+            log.info(key + " skipped");
+        }
+
+        log.info("Selectors deselect all");
     };
 
     Filter.prototype._unsetValues = function (o, silent) {

@@ -102,6 +102,15 @@ define([
     };
 
     /**
+     * deselectAll method
+     * Mandatory method
+     */
+    Dropdown.prototype.deselectAll = function (id) {
+        console.log("in deselectAll dropdown")
+        //TO DO
+    };
+
+    /**
      * Disposition method
      * Mandatory method
      */

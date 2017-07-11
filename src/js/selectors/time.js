@@ -173,6 +173,15 @@ define([
         this.$pickerEl.data("DateTimePicker").date(Moment(d,'X'));
     };
 
+    /**
+     * deselectAll method
+     * Mandatory method
+     */
+    Time.prototype.deselectAll = function (id) {
+        console.log("in deselectAll time")
+        //TO DO
+    };
+
     Time.prototype._checkConfiguration = function () {
 
     };

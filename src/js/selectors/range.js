@@ -145,6 +145,15 @@ define([
     };
 
     /**
+     * deselectAll method
+     * Mandatory method
+     */
+    Range.prototype.deselectAll = function (id) {
+        console.log("in deselectAll range")
+        //TO DO
+    };
+
+    /**
      * Return Tree internal status
      * return {Object} status
      */

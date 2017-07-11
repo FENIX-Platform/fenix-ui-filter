@@ -213,6 +213,15 @@ define([
 
     };
 
+    /**
+     * deselectAll method
+     * Mandatory method
+     */
+    Input.prototype.deselectAll = function (id) {
+        console.log("in deselectAll input")
+        //TO DO
+    };
+
     Input.prototype._checkConfiguration = function () {
 
         if (!this.selector.type) {

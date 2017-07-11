@@ -155,6 +155,15 @@ define([
     };
 
     /**
+     * deselectAll method
+     * Mandatory method
+     */
+    Sortable.prototype.deselectAll = function (id) {
+        console.log("in deselectAll sortable")
+        //TO DO
+    };
+
+    /**
      * Print print selection
      * return {Object} status
      */
