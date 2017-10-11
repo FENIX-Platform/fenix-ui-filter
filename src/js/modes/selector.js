@@ -142,29 +142,31 @@ define([
                 }
             }
 
-        }
-        else {
-
-            v = this.mainSelector.instance.getValues(format);
-            values = v.values;
-            labels = v.labels;
-
-            this.untag(this.mainSelector.instance.$el);
-
-            valid = this._validateSelection(v.values);
-
-            if (valid !== true) {
-                result.errors[this.mainSelector.id] = valid;
-                result.valid = false;
-                this.tagAsInvalid(this.mainSelector.instance.$el, valid);
+        } else {
+            if (this.mainSelector.instance === undefined ) {
+                log.warn('Instance is undefined.')
             } else {
-                this.tagAsValid(this.mainSelector.instance.$el);
+                v = this.mainSelector.instance.getValues(format);
+                values = v.values;
+                labels = v.labels;
+
+                this.untag(this.mainSelector.instance.$el);
+                valid = this._validateSelection(v.values);
+
+                if (valid !== true) {
+                    result.errors[this.mainSelector.id] = valid;
+                    result.valid = false;
+                    this.tagAsInvalid(this.mainSelector.instance.$el, valid);
+                } else {
+                    this.tagAsValid(this.mainSelector.instance.$el);
+                }
             }
 
         }
 
         result.values = values;
         result.labels = labels;
+
 
         return result;
     };
@@ -418,7 +420,7 @@ define([
     Selector.prototype.enable = function (silent) {
 
         _.each(this.selectors, _.bind(function (obj) {
-            obj.instance.enable(silent);
+            if (obj.instance) obj.instance.enable(silent);
         }, this));
 
         this.$el.find(s.SWITCH).prop("checked", true);
@@ -436,7 +438,7 @@ define([
     Selector.prototype.disable = function (silent) {
 
         _.each(this.selectors, _.bind(function (obj) {
-            obj.instance.disable(silent)
+            if (obj.instance) obj.instance.disable(silent)
         }, this));
 
         this.$el.find(s.SWITCH).prop("checked", false);
