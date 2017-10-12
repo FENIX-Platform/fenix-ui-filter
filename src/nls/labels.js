@@ -1,16 +1,13 @@
 define([
         "./en/labels",
-        "./fr/labels",
-        "./es/labels"
+        "./fr/labels"
     ],
-    function (i18nEn, i18nFr, i18nEs) {
+    function (i18nEn, i18nFr) {
 
         'use strict';
 
         return {
-
             en: i18nEn,
-            fr: i18nFr,
-            es: i18nEs
+            fr: i18nFr
         }
     });
