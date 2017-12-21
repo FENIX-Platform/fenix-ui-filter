@@ -70,6 +70,11 @@ define([
 
             var val = $(element).val();
 
+            if((element.type == "text")&&(val!=null)&&(typeof val!='undefined')&&(val.length>0))
+            {
+                val += '*';
+            }
+
             result.values.push(val);
             result.labels[val] = $(element).siblings("label").text() || val;
 
