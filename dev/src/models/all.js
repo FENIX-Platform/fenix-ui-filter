@@ -62,6 +62,20 @@ define([
                 }
             },
 
+            livesearch: {
+
+                selector: {
+                    id: "input",
+                    type: "livesearch"
+                },
+
+                template: {
+                    title: "Livesearch Text",
+                    hideSwitch: false,
+                    hideRemoveButton: false
+                }
+            },
+
             textDisabled: {
 
                 selector: {

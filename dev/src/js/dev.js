@@ -60,7 +60,7 @@ define([
             AMIS: "#amis",
             AMIS_BTN: "#amis-get-values-btn",
             AMIS_REMOVE_BTN: "#amis-remove-btn",
-            AMIS_ADD_BTN: "#amis-add-btn",
+            AMIS_ADD_BTN: "#amis-add-btn"
         },
         empty_model = {data: []},
         error_model = {},
@@ -99,9 +99,9 @@ define([
 
         //this._renderDependencies();
 
-        //this._renderAll();
+        this._renderAll();
 
-        this._renderAdam();
+        //this._renderAdam();
 
         return;
 
@@ -135,6 +135,11 @@ define([
             selectors: AllModel,
             el: s.AMIS
         });
+
+        $(s.AMIS_BTN).on("click", function () {
+            console.log(filter.getValues())
+        });
+
     };
 
     Dev.prototype._renderAdam = function () {
