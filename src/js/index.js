@@ -561,7 +561,7 @@ define([
     Filter.prototype._disableDisabledSelectorsByDefault = function () {
 
         _.each(this.selectors, _.bind(function (s, name) {
-            if (s.disabled === true) {
+            if ((s.selector)&&(s.selector.disabled === true)) {
                 this._callSelectorInstanceMethod(name, "disable");
             }
         }, this));
@@ -1127,6 +1127,51 @@ define([
                 instance.disableReadOnly()
             } else {
                 instance.enableReadOnly()
+            }
+        }
+    };
+
+    Filter.prototype._dep_mandatoryIfOtherValue = function (payload, o) {
+        //alert('in 2')
+        log.info("_dep_mandatoryIfOtherValue invokation");
+        log.info(o);
+
+        var forbiddenValue = o.args.value,
+            selectedValues = payload.values || [],
+            selector = this.selectors[o.target] || {},
+            instance = selector.instance;
+
+        // log.info("selector");
+        // log.info(selector);
+        // log.info("instance");
+        // log.info(instance);
+        // log.info("forbiddenValue");
+        // log.info(forbiddenValue);
+        // log.info("selectedValues");
+        // log.info(selectedValues);
+
+        if (instance) {
+            if (_.contains(selectedValues, forbiddenValue)) {
+                //console.log(instance.constraints)
+                if((instance.constraints!=null)&&(typeof instance.constraints!='undefined'))
+                    instance.constraints["presence"] = true;
+                else
+                    instance.constraints = {"presence": true};
+
+                this.getValues();
+                //console.log(instance.constraints)
+                // this._configureSelectorAfterDependency();
+                // this._trigger('ready');
+            } else {
+                // instance.constraints = {};
+                //console.log(instance.constraints)
+                if((instance.constraints!=null)&&(typeof instance.constraints!='undefined'))
+                    delete instance.constraints["presence"];
+
+                this.getValues();
+                //console.log(instance.constraints)
+                // this._configureSelectorAfterDependency();
+                // this._trigger('ready');
             }
         }
     };

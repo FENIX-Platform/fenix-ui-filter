@@ -1065,6 +1065,32 @@ define([
         }
     };
 
+    Selector.prototype._dep_mandatoryIfOtherValue = function (payload, o) {
+        //alert('in 2')
+        log.info("_dep_mandatoryIfOtherValue invokation");
+        log.info(o);
+
+        var forbiddenValue = o.args.value,
+            selectedValues = payload.values || [],
+            selector = this.selectors[o.target] || {},
+            instance = selector.instance;
+
+        if (instance) {
+            if (_.contains(selectedValues, forbiddenValue)) {
+                if((instance.constraints!=null)&&(typeof instance.constraints!='undefined'))
+                    instance.constraints["presence"] = true;
+                else
+                    instance.constraints = {"presence": true};
+
+                instance.getValues();
+            } else {
+                if((instance.constraints!=null)&&(typeof instance.constraints!='undefined'))
+                    delete instance.constraints["presence"];
+
+                instance.getValues();
+            }
+        }
+    };
 
     return Selector;
 

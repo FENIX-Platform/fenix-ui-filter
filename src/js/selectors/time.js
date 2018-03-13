@@ -124,6 +124,30 @@ define([
     };
 
     /**
+     * Enable selector
+     * Mandatory method
+     */
+    Time.prototype.enableReadOnly = function () {
+
+        this.$pickerEl.data("DateTimePicker").disable();
+
+        log.info("Selector read only enabled : " + this.id);
+
+    };
+
+    /**
+     * Enable selector
+     * Mandatory method
+     */
+    Time.prototype.disableReadOnly = function () {
+
+        this.$pickerEl.data("DateTimePicker").enable();
+
+        log.info("Selector read only disabled : " + this.id);
+
+    };
+
+    /**
      * Return Tree internal status
      * return {Object} status
      */
