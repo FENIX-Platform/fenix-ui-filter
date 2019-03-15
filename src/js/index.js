@@ -266,6 +266,9 @@ define([
 
         this.dependencies = this.initial.dependencies || {};
 
+        this.serviceProvider = this.initial.serviceProvider || undefined;
+
+
     };
 
     Filter.prototype._validateInput = function () {
@@ -465,7 +468,8 @@ define([
                     plugins: Plugins,
                     el: this.$el,
                     cache: this.cache,
-                    environment: this.environment
+                    environment: this.environment,
+                    serviceProvider: this.serviceProvider
                     //summaryRender: obj.summaryRender < Still need fixing.
 
                 });

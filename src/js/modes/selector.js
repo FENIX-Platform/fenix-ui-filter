@@ -596,6 +596,7 @@ define([
         this.environment = this.initial.environment;
         this.cache = this.initial.cache;
         this.values = this.initial.values;
+        this.serviceProvider = this.initial.serviceProvider;
 
         this.classNames = this.initial.classNames || "";
 
@@ -612,7 +613,9 @@ define([
 
         this.bridge = new Bridge({
             environment: this.environment,
-            cache: this.cache
+            cache: this.cache,
+            serviceProvider : this.serviceProvider
+
         });
     };
 
